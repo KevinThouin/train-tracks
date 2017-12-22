@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Generated with glade 3.20.0 -->
+<interface>
+  <requires lib="gtk+" version="3.20"/>
+  <object class="GtkAdjustment" id="speed_adjustment">
+    <property name="lower">0</property>
+    <property name="upper">255</property>
+    <property name="value">55</property>
+    <property name="step_increment">1</property>
+    <property name="page_increment">10</property>
+    <signal name="value-changed" handler="speed_changed" object="TrainTracksAppWindow" swapped="yes"/>
+  </object>
+  <template class="TrainTracksAppWindow" parent="GtkApplicationWindow">
+    <property name="can_focus">False</property>
+    <property name="border_width">6</property>
+    <property name="default_width">400</property>
+    <property name="default_height">600</property>
+    <property name="accept_focus">True</property>
+	<property name="events">GDK_SCROLL_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK | GDK_POINTER_MOTION_MASK</property>
+	<signal name="button-press-event"   handler="button_evt"/>
+	<signal name="button-release-event" handler="button_evt"/>
+	<signal name="motion-notify-event"  handler="motion_evt"/>
+	<signal name="scroll-event"         handler="mouse_scroll_evt"/>
+    <child>
+      <object class="GtkBox" id="main_box">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="orientation">vertical</property>
+        <property name="spacing">6</property>
+        <child>
+          <object class="GtkGLArea" id="gl_drawing_area">
+			<signal name="realize" handler="gl_init" object="TrainTracksAppWindow" swapped="yes"/>
+            <signal name="unrealize" handler="gl_fini" object="TrainTracksAppWindow" swapped="yes"/>
+            <signal name="render" handler="gl_draw" object="TrainTracksAppWindow" swapped="yes"/>
+			<signal name="resize" handler="gl_resize" object="TrainTracksAppWindow" swapped="yes"/>
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+			<property name="hexpand">True</property>
+            <property name="vexpand">True</property>
+			<property name="events">GDK_SCROLL_MASK | GDK_KEY_PRESS_MASK</property>
+          </object>
+          <packing>
+            <property name="expand">True</property>
+            <property name="fill">True</property>
+            <property name="position">0</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkBox" id="control_box">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="orientation">vertical</property>
+            <child>
+              <object class="GtkBox" id="speed_box">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="spacing">6</property>
+                <child>
+                  <object class="GtkLabel" id="speed_label">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="label" translatable="yes">Vitesse: </property>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">0</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkScale" id="speed_scale">
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="adjustment">speed_adjustment</property>
+                    <property name="fill_level">360</property>
+                    <property name="round_digits">1</property>
+                    <property name="draw_value">False</property>
+                  </object>
+                  <packing>
+                    <property name="expand">True</property>
+                    <property name="fill">True</property>
+                    <property name="position">1</property>
+                  </packing>
+                </child>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkToggleButton" id="play_button">
+                <property name="label" translatable="yes">Play</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <signal name="toggled" handler="play_toggled" object="TrainTracksAppWindow" swapped="yes"/>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">1</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkButton" id="quit_button">
+                <property name="label" translatable="yes">Quit</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <property name="action_name">app.quit</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">2</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">1</property>
+          </packing>
+        </child>
+      </object>
+    </child>
+    <child>
+      <placeholder/>
+    </child>
+  </template>
+  <object class="GtkSizeGroup" id="control_label_scale">
+    <widgets>
+      <widget name="speed_label"/>
+    </widgets>
+  </object>
+</interface>

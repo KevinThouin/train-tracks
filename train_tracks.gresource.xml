@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<gresources>
+  <gresource prefix="/ca/usherbrooke/math/lwatson/train_tracks">
+    <file preprocess="xml-stripblanks">train_tracks_app_window.ui</file>
+    <file preprocess="xml-stripblanks">train_tracks_app_menu.ui</file>
+    <file>train_tracks_fragment.glsl</file>
+    <file>train_tracks_vertex.glsl</file>
+  </gresource>
+</gresources>
