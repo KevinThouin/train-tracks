@@ -48,7 +48,7 @@ private:
 	AnimateMoveArrowInArrowBoxCommand(ArrowBox::Renderer& arrowBox, bool isAbsolute) : arwBox(arrowBox), m_isAbsolute(isAbsolute) {}
 	
 public:
-	static AnimateMoveArrowInArrowBoxCommand* create(ArrowBox::Renderer& arrowBox, bool isAbsolute=true) {
+	static AnimateMoveArrowInArrowBoxCommand* create(ArrowBox::Renderer& arrowBox, bool isAbsolute) {
 		return new AnimateMoveArrowInArrowBoxCommand(arrowBox, isAbsolute);
 	}
 	

@@ -260,7 +260,7 @@ void ZeroHandle::printDepth() const {
 
 void ZeroHandleRenderer::getLenghtPoints(unsigned int i, float& t0, float& t1, float& t2, float& t3, float& t4, float& t5, float& t6, float& t7, float& t8) {
 	if (i < m_numTrackFull) {
-		t0 = m_fullWestGapTracks[i].getCurve().getLenght();
+		t0 = m_fullWestGapTracks[0].getCurve().getLenght();
 		t1 = t0;
 		t2 = t1;
 		t3 = t2;
@@ -271,31 +271,31 @@ void ZeroHandleRenderer::getLenghtPoints(unsigned int i, float& t0, float& t1, f
 		t8 = t7;
 	} else if (i < m_numTrackFull+m_numTrackVoid) {
 		i-= m_numTrackFull;
-		t0 =      m_voidEastGapTracks[i].getCurve().getLenght();
-		t1 = t0 + m_upperRightCornerVoidHandleTracks[i].getCurve().getLenght();
-		t2 = t1 + m_rightVoidHandleTracks[i].getCurve().getLenght();
-		t3 = t2 + m_lowerRightCornerVoidHandleTracks[i].getCurve().getLenght();
-		t4 = t3 + m_lowerVoidHandleTracks[i].getCurve().getLenght();
-		t5 = t4 + m_lowerLeftCornerVoidHandleTracks[i].getCurve().getLenght();
-		t6 = t5 + m_southTracks[i].getCurve().getLenght();
+		t0 =      m_voidEastGapTracks[0].getCurve().getLenght(); // NOTE: toutes les voies devraient avoir la meme longueur
+		t1 = t0 + 1.0;
+		t2 = t1 + m_rightVoidHandleTracks[0].getCurve().getLenght();
+		t3 = t2 + 1.0;
+		t4 = t3 + m_lowerVoidHandleTracks[0].getCurve().getLenght();
+		t5 = t4 + 1.0;
+		t6 = t5 + m_southTracks[0].getCurve().getLenght();
 		t7 = t6;
 		t8 = t7;
 	} else if (i < 2*m_numTrackFull+m_numTrackVoid) {
 		i -= (m_numTrackFull+m_numTrackVoid);
-		t0 =      m_fullEastGapTracks[i].getCurve().getLenght();
-		t1 = t0 + m_upperRightCornerFullHandleTracks[i].getCurve().getLenght();
-		t2 = t1 + m_rightFullHandleTracks[i].getCurve().getLenght();
-		t3 = t2 + m_lowerRightCornerFullHandleTracks[i].getCurve().getLenght();
-		t4 = t3 + m_lowerFullHandleTracks[i].getCurve().getLenght();
-		t5 = t4 + m_lowerLeftCornerFullHandleTracks[i].getCurve().getLenght();
-		t6 = t5 + m_leftFullHandleTracks[i].getCurve().getLenght();
-		t7 = t6 + m_upperLeftCornerFullHandleTracks[i].getCurve().getLenght();
-		t8 = t7 + m_westTracks[i].getCurve().getLenght();
+		t0 =      m_fullEastGapTracks[0].getCurve().getLenght();
+		t1 = t0 + 1.0;
+		t2 = t1 + m_rightFullHandleTracks[0].getCurve().getLenght();
+		t3 = t2 + 1.0;
+		t4 = t3 + m_lowerFullHandleTracks[0].getCurve().getLenght();
+		t5 = t4 + 1.0;
+		t6 = t5 + m_leftFullHandleTracks[0].getCurve().getLenght();
+		t7 = t6 + 1.0;
+		t8 = t7 + m_westTracks[0].getCurve().getLenght();
 	} else {
 		i -= (2*m_numTrackFull+m_numTrackVoid);
-		t0 =      m_voidWestGapTracks[i].getCurve().getLenght();
-		t1 = t0 + m_upperLeftCornerVoidHandleTracks[i].getCurve().getLenght();
-		t2 = t1 + m_northTracks[i].getCurve().getLenght();
+		t0 =      m_voidWestGapTracks[0].getCurve().getLenght();
+		t1 = t0 + 1.0;
+		t2 = t1 + m_northTracks[0].getCurve().getLenght();
 		t3 = t2;
 		t4 = t3;
 		t5 = t4;
@@ -816,17 +816,13 @@ void ZeroHandleRenderer::updateLenght() {
 float ZeroHandleRenderer::getPathLenght(unsigned int trackStartI, unsigned int trackEndI, unsigned int trackStartJ, unsigned int trackEndJ) {
 	float tI0, tI1;
 	getLenghtPoints(trackStartI, tI0, tI0, tI0, tI0, tI0, tI0, tI0, tI0, tI0);
-	auto itI = m_pairTrackMap.find(ZeroHandle::UnorderedIdempotentsPair(trackStartI, trackEndI)); assert(itI!=m_pairTrackMap.end());
-	TrackBezier& zeroHandleTrackI = itI->second;
-	tI0 += zeroHandleTrackI.getCurve().getLenght();
+	tI0 += 1.0;
 	getLenghtPoints(trackEndI, tI1, tI1, tI1, tI1, tI1, tI1, tI1, tI1, tI1);
 	float sumI = tI0+tI1;
 	
 	float tJ0, tJ1;
 	getLenghtPoints(trackStartJ, tJ0, tJ0, tJ0, tJ0, tJ0, tJ0, tJ0, tJ0, tJ0);
-	auto itJ = m_pairTrackMap.find(ZeroHandle::UnorderedIdempotentsPair(trackStartJ, trackEndJ)); assert(itJ!=m_pairTrackMap.end());
-	TrackBezier& zeroHandleTrackJ = itJ->second;
-	tJ0 = zeroHandleTrackJ.getCurve().getLenght();
+	tJ0 += 1.0;
 	getLenghtPoints(trackEndJ, tJ1, tJ1, tJ1, tJ1, tJ1, tJ1, tJ1, tJ1, tJ1);
 	float sumJ = tJ0+tJ1;
 	
@@ -836,17 +832,13 @@ float ZeroHandleRenderer::getPathLenght(unsigned int trackStartI, unsigned int t
 float ZeroHandleRenderer::getTAfterZeroHandle(unsigned int trackStartI, unsigned int trackEndI, unsigned int trackStartJ, unsigned int trackEndJ) {
 	float tI, tZeroHandleI;
 	getLenghtPoints(trackStartI, tZeroHandleI, tZeroHandleI, tZeroHandleI, tZeroHandleI, tZeroHandleI, tZeroHandleI, tZeroHandleI, tZeroHandleI, tZeroHandleI);
-	auto itI = m_pairTrackMap.find(ZeroHandle::UnorderedIdempotentsPair(trackStartI, trackEndI)); assert(itI!=m_pairTrackMap.end());
-	TrackBezier& zeroHandleTrackI = itI->second;
-	tZeroHandleI += zeroHandleTrackI.getCurve().getLenght();
+	tZeroHandleI += 1.0;
 	getLenghtPoints(trackEndI, tI, tI, tI, tI, tI, tI, tI, tI, tI);
 	tZeroHandleI /= tZeroHandleI+tI;
 	
 	float tJ, tZeroHandleJ;
 	getLenghtPoints(trackStartJ, tZeroHandleJ, tZeroHandleJ, tZeroHandleJ, tZeroHandleJ, tZeroHandleJ, tZeroHandleJ, tZeroHandleJ, tZeroHandleJ, tZeroHandleJ);
-	auto itJ = m_pairTrackMap.find(ZeroHandle::UnorderedIdempotentsPair(trackStartJ, trackEndJ)); assert(itJ!=m_pairTrackMap.end());
-	TrackBezier& zeroHandleTrackJ = itJ->second;
-	tZeroHandleJ += zeroHandleTrackJ.getCurve().getLenght();
+	tZeroHandleJ += 1.0;
 	getLenghtPoints(trackEndJ, tJ, tJ, tJ, tJ, tJ, tJ, tJ, tJ, tJ);
 	tZeroHandleJ /= tZeroHandleJ+tJ;
 	
@@ -870,9 +862,7 @@ void ZeroHandleRenderer::setArrowPosInZeroHandle(Arrow::Renderer& arrow, unsigne
 	
 	float tI[19];
 	getLenghtPoints(trackStartI, tI[0], tI[1], tI[2], tI[3], tI[4], tI[5], tI[6], tI[7], tI[8]);
-	auto itI = m_pairTrackMap.find(ZeroHandle::UnorderedIdempotentsPair(trackStartI, trackEndI)); assert(itI!=m_pairTrackMap.end());
-	TrackBezier& zeroHandleTrackI = itI->second;
-	tI[9] = tI[8]+zeroHandleTrackI.getCurve().getLenght();
+	tI[9] = tI[8]+1.0;
 	getLenghtPoints(trackEndI, tI[10], tI[11], tI[12], tI[13], tI[14], tI[15], tI[16], tI[17], tI[18]);
 	float sum = tI[9]+tI[18];
 	tI[0]/=sum; tI[1]/=sum; tI[2]/=sum; tI[3]/=sum; tI[4]/=sum; tI[5]/=sum; tI[6]/=sum; tI[7]/=sum; tI[8]/=sum; tI[9]/=sum;
@@ -880,9 +870,7 @@ void ZeroHandleRenderer::setArrowPosInZeroHandle(Arrow::Renderer& arrow, unsigne
 	
 	float tJ[19];
 	getLenghtPoints(trackStartJ, tJ[0], tJ[1], tJ[2], tJ[3], tJ[4], tJ[5], tJ[6], tJ[7], tJ[8]);
-	auto itJ = m_pairTrackMap.find(ZeroHandle::UnorderedIdempotentsPair(trackStartJ, trackEndJ)); assert(itJ!=m_pairTrackMap.end());
-	TrackBezier& zeroHandleTrackJ = itJ->second;
-	tJ[9] = tJ[8]+zeroHandleTrackJ.getCurve().getLenght();
+	tJ[9] = tJ[8]+1.0;
 	getLenghtPoints(trackEndJ, tJ[10], tJ[11], tJ[12], tJ[13], tJ[14], tJ[15], tJ[16], tJ[17], tJ[18]);
 	sum = tJ[9]+tJ[18];
 	tJ[0]/=sum; tJ[1]/=sum; tJ[2]/=sum; tJ[3]/=sum; tJ[4]/=sum; tJ[5]/=sum; tJ[6]/=sum; tJ[7]/=sum; tJ[8]/=sum; tJ[9]/=sum;

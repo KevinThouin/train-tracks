@@ -12,6 +12,7 @@
 #include "c_cpp_bridge.h"
 #include "worker_thread.h"
 #include "color.h"
+#include "util.h"
 
 enum {
 	X_AXIS,
@@ -90,7 +91,12 @@ static void gl_init (TrainTracksAppWindow *self)
 	
 	/* set the window title */
 	renderer = (char *) glGetString (GL_RENDERER);
-	title = g_strdup_printf ("Train tracks on %s", renderer ? renderer : "Unknown");
+#ifdef NDEBUG
+	const char* str = "Train tracks " VERSION " on %s";
+#else
+	const char* str = "Train tracks " VERSION " (DEBUG) on %s";
+#endif
+	title = g_strdup_printf (str, renderer ? renderer : "Unknown");
 	gtk_window_set_title (GTK_WINDOW (self), title);
 	g_free (title);
 	

@@ -532,7 +532,7 @@ void ArrowBox::Renderer::transferArrowsAsPermutationBoxSlide(ArrowBox::Renderer&
 		unsigned int i = permutation.pre(it->begin());
 		unsigned int j = permutation.pre(it->end());
 		AnimateMoveArrowPermutationBox* anim0 = AnimateMoveArrowPermutationBox::create(permutation, *it, i, j, 1.0, 0.0);
-		AnimateMoveArrowInArrowBoxCommand* anim1 = AnimateMoveArrowInArrowBoxCommand::create(*this);
+		AnimateMoveArrowInArrowBoxCommand* anim1 = AnimateMoveArrowInArrowBoxCommand::create(*this, true);
 		
 		float t0y = (j > i) ? -1.0 : 1.0;
 		float p0y = (i+1)*delta;

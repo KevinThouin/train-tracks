@@ -52,15 +52,17 @@ Arrow::Renderer::Renderer(RendererGL& rendererGL, Arrow& arrow, float p0x, float
 void Arrow::Renderer::changePoints(float p0x, float p0y, float p1x, float p1y, float t0x, float t0y, float t1x, float t1y) {
 	float dx = p1x-p0x;
 	float dy = p1y-p0y;
-	float div = t1x*t0y-t1y*t0x;
+	//float div = t1x*t0y-t0x*t1y;
 	
-	if (std::abs(div)>=1e-3) {
-		float t1 = (dy*t0x-dx*t0y)/div;
-		float t0 = (dy*t1x-dx*t1y)/div;
-		arrowBody.changePoints(p0x, p0y, p0x+0.666666666667*t0*t0x, p0y+0.666666666667*t0*t0y, p1x-0.666666666667*t1*t1x, p1y-0.666666666667*t1*t1y, p1x, p1y);
+	float t = sqrt(dx*dx+dy*dy);
+	/*if (std::abs(div)>=1e-3) {
+		float t1 = (dy*t1x-dx*t1y)/div;
+		float t0 = (dy*t0x-dx*t0y)/div;
+		arrowBody.changePoints(p0x, p0y, p0x+t0*t0x, p0y+t0*t0y, p1x-t1*t1x, p1y-t1*t1y, p1x, p1y);
 	} else {
-		arrowBody.changePoints(p0x, p0y, p0x+0.333333333333*dx,     p0y+0.333333333333*dy,     p1x-0.333333333333*dx,     p1y-0.333333333333*dy,     p1x, p1y);
-	}
+		arrowBody.changePoints(p0x, p0y, p0x+0.5*dx,     p0y+0.5*dy,     p1x-0.5*dx,     p1y-0.5*dy,     p1x, p1y);
+	}*/
+	arrowBody.changePoints(p0x, p0y, p0x+t*t0x, p0y+t*t0y, p1x+t*t1x, p1y+t*t1y, p1x, p1y);
 	
 	
 	float tipFactor;

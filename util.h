@@ -8,6 +8,8 @@
 extern "C" {
 #endif
 
+#define VERSION "1.0.0"
+
 #ifdef __GNUC__
  #define USE_GCC 1
 #else
@@ -21,7 +23,7 @@ extern "C" {
 #if USE_GCC && GCC_VERSION>40500
  #define UNREACHABLE() __builtin_unreachable()
 #else
- #define UNREACHABLE() abort()
+ #define UNREACHABLE() ((void) 0)
 #endif
 
 #if USE_GCC && GCC_VERSION>40600

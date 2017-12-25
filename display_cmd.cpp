@@ -100,7 +100,7 @@ void AnimateMoveArrowPermutationBox::run(RendererGL& rendererGL, float t) {
 	float p0x, p0y, p1x, p1y;
 	trackI.getPoint(p0x, p0y, t);
 	trackJ.getPoint(p1x, p1y, t);
-	float t0y = (p1y > p0y) ? -1.0 : 1.0;
+	float t0y = (p1y < p0y) ? -1.0 : 1.0;
 	
 	m_arrow.changePoints(p0x, p0y, p1x, p1y, 0.0, t0y, 0.0, -t0y);
 }
@@ -432,7 +432,7 @@ std::pair<int, bool> pushMoveSubcommand(ArrowBox& arrowBox, ArrowInArrowBoxIndex
 	} else n++;
 	if (n != 0) {
 		SynchronousSubTaskCommand* cmd = SynchronousSubTaskCommand::create(std::abs(n)/3.0);
-		AnimateMoveArrowInArrowBoxCommand* anim = AnimateMoveArrowInArrowBoxCommand::create(arrowBox.getRenderer());
+		AnimateMoveArrowInArrowBoxCommand* anim = AnimateMoveArrowInArrowBoxCommand::create(arrowBox.getRenderer(), false);
 		cmd->addCommand(anim);
 		arrowBox.getRenderer().moveArrow(movingArrow.first.get().getArrowRendererInList(), movingArrow.second, n, anim);
 		subCommandQueue.push(cmd);
@@ -513,7 +513,7 @@ public:
 		
 		SynchronousSubTaskCommand* cmd = SynchronousSubTaskCommand::create(10.0/3.0);
 		AnimateMoveTrackLineArrowBox*      animArrowTrack     = AnimateMoveTrackLineArrowBox::create(arrowBox);
-		AnimateMoveArrowInArrowBoxCommand* animArrows         = AnimateMoveArrowInArrowBoxCommand::create(arrowBox);
+		AnimateMoveArrowInArrowBoxCommand* animArrows         = AnimateMoveArrowInArrowBoxCommand::create(arrowBox, true);
 		AnimateMoveTrackPermutationBox*    animPrePermutation = AnimateMoveTrackPermutationBox::create(sidePermutation);
 		AnimateMoveTrackPermutationBox*    animPermutation    = AnimateMoveTrackPermutationBox::create(permutation);
 		cmd->addCommand(animArrowTrack); cmd->addCommand(animArrows); cmd->addCommand(animPrePermutation); cmd->addCommand(animPermutation);
@@ -550,7 +550,7 @@ public:
 		int n = targetArw.second - movingArw.second;
 		
 		SynchronousSubTaskCommand* cmd = SynchronousSubTaskCommand::create(std::abs(n)/3.0);
-		AnimateMoveArrowInArrowBoxCommand* anim = AnimateMoveArrowInArrowBoxCommand::create(arwBox.getRenderer());
+		AnimateMoveArrowInArrowBoxCommand* anim = AnimateMoveArrowInArrowBoxCommand::create(arwBox.getRenderer(), false);
 		cmd->addCommand(anim);
 		
 		arwBox.getRenderer().moveArrow(movingArw.first.get().getArrowRendererInList(), movingArw.second, n, anim);
@@ -587,11 +587,11 @@ public:
 		bool& forward(moveData.second);
 		
 		SynchronousSubTaskCommand*         cmd0     = SynchronousSubTaskCommand::create(0.5/3.0);
-		AnimateMoveArrowInArrowBoxCommand* anim0    = AnimateMoveArrowInArrowBoxCommand::create(arwBox.getRenderer());
+		AnimateMoveArrowInArrowBoxCommand* anim0    = AnimateMoveArrowInArrowBoxCommand::create(arwBox.getRenderer(), false);
 		cmd0->addCommand(anim0);
 		
 		SynchronousSubTaskCommand*         cmd1     = SynchronousSubTaskCommand::create(1.5/3.0);
-		AnimateMoveArrowInArrowBoxCommand* anim1    = AnimateMoveArrowInArrowBoxCommand::create(arwBox.getRenderer());
+		AnimateMoveArrowInArrowBoxCommand* anim1    = AnimateMoveArrowInArrowBoxCommand::create(arwBox.getRenderer(), false);
 		UpdateArrowBoxLenghtCommand*       lenAnim1 = UpdateArrowBoxLenghtCommand::create(arwBox.getRenderer());
 		cmd1->addCommand(lenAnim1); cmd1->addCommand(anim1);
 		
@@ -629,12 +629,12 @@ public:
 		bool& forward(moveData.second);
 		
 		SynchronousSubTaskCommand*         cmd0     = SynchronousSubTaskCommand::create(0.5/3.0);
-		AnimateMoveArrowInArrowBoxCommand* anim0    = AnimateMoveArrowInArrowBoxCommand::create(arwBox.getRenderer());
+		AnimateMoveArrowInArrowBoxCommand* anim0    = AnimateMoveArrowInArrowBoxCommand::create(arwBox.getRenderer(), false);
 		UpdateArrowBoxLenghtCommand*       lenAnim0 = UpdateArrowBoxLenghtCommand::create(arwBox.getRenderer());
 		cmd0->addCommand(lenAnim0); cmd0->addCommand(anim0);
 		
 		SynchronousSubTaskCommand*         cmd1     = SynchronousSubTaskCommand::create(1.5/3.0);
-		AnimateMoveArrowInArrowBoxCommand* anim1    = AnimateMoveArrowInArrowBoxCommand::create(arwBox.getRenderer());
+		AnimateMoveArrowInArrowBoxCommand* anim1    = AnimateMoveArrowInArrowBoxCommand::create(arwBox.getRenderer(), false);
 		UpdateArrowBoxLenghtCommand*       lenAnim1 = UpdateArrowBoxLenghtCommand::create(arwBox.getRenderer());
 		cmd1->addCommand(lenAnim1); cmd1->addCommand(anim1);
 		
@@ -666,7 +666,7 @@ public:
 		int& index = m_arrow.second;
 		
 		SynchronousSubTaskCommand* cmd0 = SynchronousSubTaskCommand::create(1.0/3.0);
-		AnimateMoveArrowInArrowBoxCommand* anim0    = AnimateMoveArrowInArrowBoxCommand::create(arrowBox);
+		AnimateMoveArrowInArrowBoxCommand* anim0    = AnimateMoveArrowInArrowBoxCommand::create(arrowBox, false);
 		UpdateArrowBoxLenghtCommand*       lenAnim0 = UpdateArrowBoxLenghtCommand::create(arrowBox);
 		cmd0->addCommand(lenAnim0); cmd0->addCommand(anim0);
 		
@@ -706,7 +706,7 @@ public:
 		assert(forward);
 		
 		SynchronousSubTaskCommand*         cmd0  = SynchronousSubTaskCommand::create(1.0/3.0);
-		AnimateMoveArrowInArrowBoxCommand* anim0 = AnimateMoveArrowInArrowBoxCommand::create(arwBox.getRenderer());
+		AnimateMoveArrowInArrowBoxCommand* anim0 = AnimateMoveArrowInArrowBoxCommand::create(arwBox.getRenderer(), false);
 		cmd0->addCommand(anim0);
 		
 		SynchronousSubTaskCommand* cmd1 = SynchronousSubTaskCommand::create(1.0/3.0);
@@ -809,7 +809,7 @@ public:
 		const float permutationAnimStart = (isFirstArrowBox) ? 0.0 : 1.0;
 		
 		SynchronousSubTaskCommand* cmd0 = SynchronousSubTaskCommand::create((n + 0.5)/3.0);
-		AnimateMoveArrowInArrowBoxCommand* anim0 = AnimateMoveArrowInArrowBoxCommand::create(box);
+		AnimateMoveArrowInArrowBoxCommand* anim0 = AnimateMoveArrowInArrowBoxCommand::create(box, false);
 		cmd0->addCommand(anim0);
 		
 		if (isFirstArrowBox)
@@ -884,7 +884,7 @@ public:
 		const float permutationAnimStart = (isFirstArrowBox) ? 0.0 : 1.0;
 		
 		SynchronousSubTaskCommand* cmd0 = SynchronousSubTaskCommand::create((n + 0.5)/3.0);
-		AnimateMoveArrowInArrowBoxCommand* anim0 = AnimateMoveArrowInArrowBoxCommand::create(box);
+		AnimateMoveArrowInArrowBoxCommand* anim0 = AnimateMoveArrowInArrowBoxCommand::create(box, false);
 		cmd0->addCommand(anim0);
 		
 		ShowableCurve& trackI(permutation.getTrack(leftI).getCurve());
@@ -939,8 +939,8 @@ public:
 		cmd4->addCommand(anim2); cmd4->addCommand(anim3);
 		
 		SynchronousSubTaskCommand* cmd5 = SynchronousSubTaskCommand::create(1.0/3.0);
-		AnimateMoveArrowInArrowBoxCommand* anim4 = AnimateMoveArrowInArrowBoxCommand::create(otherBox);
-		AnimateMoveArrowInArrowBoxCommand* anim5 = AnimateMoveArrowInArrowBoxCommand::create(box);
+		AnimateMoveArrowInArrowBoxCommand* anim4 = AnimateMoveArrowInArrowBoxCommand::create(otherBox, false);
+		AnimateMoveArrowInArrowBoxCommand* anim5 = AnimateMoveArrowInArrowBoxCommand::create(box, false);
 		UpdateArrowBoxLenghtCommand* animLen1 = UpdateArrowBoxLenghtCommand::create(otherBox);
 		animLen1->setVariation(otherBox.lenght(), otherBox.lenght()+ArrowBox::Renderer::arrowSeparation());
 		cmd5->addCommand(animLen1); cmd5->addCommand(anim4); cmd5->addCommand(anim5);
@@ -1007,11 +1007,8 @@ void PassArrowsThroughtZeroHandle::run(RendererGL& rendererGL) {
 	if (&arrowBox!=&(zeroHandle.getVoidHandle().getSecondArrowBox()) && secondVoidArrowBoxNum>0) {
 		ArrowBox::Renderer& updateBox = zeroHandle.getVoidHandle().getSecondArrowBox();
 		UpdateArrowBoxLenghtCommand* lenAnim = UpdateArrowBoxLenghtCommand::create(updateBox, true);
-		AnimateMoveArrowInArrowBoxCommand* anim = AnimateMoveArrowInArrowBoxCommand::create(updateBox, false);
-		updateBox.moveArrowsFake(0, -secondVoidArrowBoxNum, anim);
 		lenAnim->setVariation(updateBox.lenght(), updateBox.lenght()+secondVoidArrowBoxNum*ArrowBox::Renderer::arrowSeparation());
 		cmd->addCommand(lenAnim, 0.0, 1.0*secondVoidArrowBoxNum);
-		cmd->addCommand(anim, 1e-5, 1.0*secondVoidArrowBoxNum);
 	}
 	
 	if (&arrowBox!=&(zeroHandle.getFullHandle().getFirstArrowBox()) && firstFullArrowBoxNum>0) {
@@ -1027,11 +1024,8 @@ void PassArrowsThroughtZeroHandle::run(RendererGL& rendererGL) {
 	if (&arrowBox!=&(zeroHandle.getFullHandle().getSecondArrowBox()) && secondFullArrowBoxNum>0) {
 		ArrowBox::Renderer& updateBox = zeroHandle.getFullHandle().getSecondArrowBox();
 		UpdateArrowBoxLenghtCommand* lenAnim = UpdateArrowBoxLenghtCommand::create(updateBox, true);
-		AnimateMoveArrowInArrowBoxCommand* anim = AnimateMoveArrowInArrowBoxCommand::create(updateBox, false);
-		updateBox.moveArrowsFake(0, -secondFullArrowBoxNum, anim);
 		lenAnim->setVariation(updateBox.lenght(), updateBox.lenght()+secondFullArrowBoxNum*ArrowBox::Renderer::arrowSeparation());
 		cmd->addCommand(lenAnim, 0.0, 1.0*secondFullArrowBoxNum);
-		cmd->addCommand(anim, 1e-5, 1.0*secondFullArrowBoxNum);
 	}
 	
 	UpdateArrowBoxLenghtCommand* lenAnim = UpdateArrowBoxLenghtCommand::create(arrowBox, true);
