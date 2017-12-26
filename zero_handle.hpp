@@ -53,7 +53,7 @@ public:
 	bool trackPairEndsAntiClockwise(std::pair<unsigned int, unsigned int> tracks, const OneHandle& oneHandle, bool isPost) const;
 	int  getArrowDepth(std::pair<unsigned int, unsigned int> tracks, const OneHandle& oneHandle, bool isPost) const;
 	unsigned int getDepth() const;
-	void moveArrowThroughout(PassArrowsThroughtZeroHandle* cmd, ArrowBox& src, std::list<ArrowBox::ArrowInArrowBox*>::iterator arrow, int index,
+	void moveArrowThroughout(PassArrowsThroughtZeroHandleCommand* cmd, ArrowBox& src, std::list<ArrowBox::ArrowInArrowBox*>::iterator arrow, int index,
 			unsigned int beginI, unsigned int beginJ);
 	
 	void proposition28();

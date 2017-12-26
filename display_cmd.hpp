@@ -32,20 +32,20 @@ static inline ArrowInArrowBoxIndexed makeArrowInArrowBoxIndexed(ArrowBox::ArrowI
 class AnimateMoveArrowInArrowBoxCommand : public Command<RendererGL&, float> {
 private:
 	struct MoveData {
-		float p0x0; float p0y0; float p1x0; float p1y0; float t0x0; float t0y0; float t1x0; float t1y0;
-		float p0x1; float p0y1; float p1x1; float p1y1; float t0x1; float t0y1; float t1x1; float t1y1;
+		float m_p0x0; float m_p0y0; float m_p1x0; float m_p1y0; float m_t0x0; float m_t0y0; float m_t1x0; float m_t1y0;
+		float m_p0x1; float m_p0y1; float m_p1x1; float m_p1y1; float m_t0x1; float m_t0y1; float m_t1x1; float m_t1y1;
 		
-		MoveData(float p0x0a, float p0y0a, float p1x0a, float p1y0a, float t0x0a, float t0y0a, float t1x0a, float t1y0a,
-				float p0x1a, float p0y1a, float p1x1a, float p1y1a, float t0x1a, float t0y1a, float t1x1a, float t1y1a) :
-			p0x0(p0x0a), p0y0(p0y0a), p1x0(p1x0a), p1y0(p1y0a), t0x0(t0x0a), t0y0(t0y0a), t1x0(t1x0a), t1y0(t1y0a),
-			p0x1(p0x1a), p0y1(p0y1a), p1x1(p1x1a), p1y1(p1y1a), t0x1(t0x1a), t0y1(t0y1a), t1x1(t1x1a), t1y1(t1y1a) {}
+		MoveData(float p0x0, float p0y0, float p1x0, float p1y0, float t0x0, float t0y0, float t1x0, float t1y0,
+				float p0x1, float p0y1, float p1x1, float p1y1, float t0x1, float t0y1, float t1x1, float t1y1) :
+			m_p0x0(p0x0), m_p0y0(p0y0), m_p1x0(p1x0), m_p1y0(p1y0), m_t0x0(t0x0), m_t0y0(t0y0), m_t1x0(t1x0), m_t1y0(t1y0),
+			m_p0x1(p0x1), m_p0y1(p0y1), m_p1x1(p1x1), m_p1y1(p1y1), m_t0x1(t0x1), m_t0y1(t0y1), m_t1x1(t1x1), m_t1y1(t1y1) {}
 	};
 	
-	std::vector<std::pair<Arrow::Renderer*, MoveData>> arrowsMoveData;
-	ArrowBox::Renderer& arwBox;
+	std::vector<std::pair<Arrow::Renderer*, MoveData>> m_arrowsMoveData;
+	ArrowBox::Renderer& m_arrowBox;
 	bool m_isAbsolute;
 	
-	AnimateMoveArrowInArrowBoxCommand(ArrowBox::Renderer& arrowBox, bool isAbsolute) : arwBox(arrowBox), m_isAbsolute(isAbsolute) {}
+	AnimateMoveArrowInArrowBoxCommand(ArrowBox::Renderer& arrowBox, bool isAbsolute) : m_arrowBox(arrowBox), m_isAbsolute(isAbsolute) {}
 	
 public:
 	static AnimateMoveArrowInArrowBoxCommand* create(ArrowBox::Renderer& arrowBox, bool isAbsolute) {
@@ -63,17 +63,17 @@ public:
 class AnimateMoveTrackLineArrowBox : public Command<RendererGL&, float> {
 private:
 	struct MoveData {
-		float p0x0; float p0y0; float p1x0; float p1y0;
-		float p0x1; float p0y1; float p1x1; float p1y1;
+		float m_p0x0; float m_p0y0; float m_p1x0; float m_p1y0;
+		float m_p0x1; float m_p0y1; float m_p1x1; float m_p1y1;
 		
-		MoveData(float p0x0a, float p0y0a, float p1x0a, float p1y0a, float p0x1a, float p0y1a, float p1x1a, float p1y1a) :
-			p0x0(p0x0a), p0y0(p0y0a), p1x0(p1x0a), p1y0(p1y0a), p0x1(p0x1a), p0y1(p0y1a), p1x1(p1x1a), p1y1(p1y1a) {}
+		MoveData(float p0x0, float p0y0, float p1x0, float p1y0, float p0x1, float p0y1, float p1x1, float p1y1) :
+			m_p0x0(p0x0), m_p0y0(p0y0), m_p1x0(p1x0), m_p1y0(p1y0), m_p0x1(p0x1), m_p0y1(p0y1), m_p1x1(p1x1), m_p1y1(p1y1) {}
 	};
 	
-	std::vector<std::pair<TrackLine*, MoveData>> trackMoveData;
-	ArrowBox::Renderer& arwBox;
+	std::vector<std::pair<TrackLine*, MoveData>> m_trackMoveData;
+	ArrowBox::Renderer& m_arrowBox;
 	
-	AnimateMoveTrackLineArrowBox(ArrowBox::Renderer& arrowBox) : arwBox(arrowBox) {}
+	AnimateMoveTrackLineArrowBox(ArrowBox::Renderer& arrowBox) : m_arrowBox(arrowBox) {}
 	
 public:
 	static AnimateMoveTrackLineArrowBox* create(ArrowBox::Renderer& arrowBox) {return new AnimateMoveTrackLineArrowBox(arrowBox);}
@@ -109,21 +109,21 @@ public:
 class AnimateMoveTrackPermutationBox : public Command<RendererGL&, float> {
 private:
 	struct MoveData {
-		float p0x0; float p0y0; float p1x0; float p1y0;
-		float p0x1; float p0y1; float p1x1; float p1y1;
-		Direction d0; Direction d1;
+		float m_p0x0; float m_p0y0; float m_p1x0; float m_p1y0;
+		float m_p0x1; float m_p0y1; float m_p1x1; float m_p1y1;
+		Direction m_d0; Direction m_d1;
 		
-		MoveData(float p0x0a, float p0y0a, float p1x0a, float p1y0a, float p0x1a, float p0y1a, float p1x1a, float p1y1a, Direction d0a, Direction d1a) :
-			p0x0(p0x0a), p0y0(p0y0a), p1x0(p1x0a), p1y0(p1y0a), p0x1(p0x1a), p0y1(p0y1a), p1x1(p1x1a), p1y1(p1y1a), d0(d0a), d1(d1a) {}
+		MoveData(float p0x0, float p0y0, float p1x0, float p1y0, float p0x1, float p0y1, float p1x1, float p1y1, Direction d0, Direction d1) :
+			m_p0x0(p0x0), m_p0y0(p0y0), m_p1x0(p1x0), m_p1y0(p1y0), m_p0x1(p0x1), m_p0y1(p0y1), m_p1x1(p1x1), m_p1y1(p1y1), m_d0(d0), m_d1(d1) {}
 	};
 	
-	std::vector<std::pair<TrackBezier*, MoveData>> trackMoveData;
-	PermutationBox::Renderer& perBox;
+	std::vector<std::pair<TrackBezier*, MoveData>> m_trackMoveData;
+	PermutationBox::Renderer& m_permutationBox;
 	
-	AnimateMoveTrackPermutationBox(PermutationBox::Renderer& permutationBox) : perBox(permutationBox) {}
+	AnimateMoveTrackPermutationBox(PermutationBox::Renderer& permutationBox) : m_permutationBox(permutationBox) {}
 	
 public:
-	static AnimateMoveTrackPermutationBox* create(PermutationBox::Renderer& arrowBox) {return new AnimateMoveTrackPermutationBox(arrowBox);}
+	static AnimateMoveTrackPermutationBox* create(PermutationBox::Renderer& permutationBox) {return new AnimateMoveTrackPermutationBox(permutationBox);}
 	
 	void addTrack(TrackBezier& track, float p0x0, float p0y0, float p1x0, float p1y0, float p0x1, float p0y1, float p1x1, float p1y1, Direction d0, Direction d1);
 	
@@ -201,17 +201,17 @@ public:
 };
 
 class GenCrossingCommand : public Command<RendererGL&, float> {
-	ArrowBox::Renderer& ren;
-	float x0, x1;
-	float y0, y1;
-	int layer;
+	ArrowBox::Renderer& m_arrowBox;
+	float m_xBegin, m_xEnd;
+	float m_yI, m_yJ;
+	int m_layer;
 	
-	GenCrossingCommand(ArrowBox::Renderer& renderer, float xBegin, float xEnd, float yI, float yJ) :
-			ren(renderer), x0(ren.getBasex()+xBegin), x1(ren.getBasex()+xEnd), y0(ren.getBasey()-yI), y1(ren.getBasey()-yJ) {}
+	GenCrossingCommand(ArrowBox::Renderer& arrowBox, float xBegin, float xEnd, float yI, float yJ) :
+			m_arrowBox(arrowBox), m_xBegin(arrowBox.getBasex()+xBegin), m_xEnd(arrowBox.getBasex()+xEnd), m_yI(arrowBox.getBasey()-yI), m_yJ(arrowBox.getBasey()-yJ) {}
 	
 public:
-	static GenCrossingCommand* create(ArrowBox::Renderer& renderer, float xBegin, float xEnd, float yI, float yJ) {
-		return new GenCrossingCommand(renderer, xBegin, xEnd, yI, yJ);
+	static GenCrossingCommand* create(ArrowBox::Renderer& arrowBox, float xBegin, float xEnd, float yI, float yJ) {
+		return new GenCrossingCommand(arrowBox, xBegin, xEnd, yI, yJ);
 	}
 	
 	virtual void run(RendererGL& rendererGL, float t);
@@ -221,31 +221,32 @@ public:
 
 class MoveCrossingCommand : public Command<RendererGL&, float> {
 protected:
-	ArrowBox::Renderer& ren;
+	ArrowBox::Renderer& m_arrowBox;
 private:
-	float xingStart, xingEnd, xingNewStart, xingNewEnd;
-	float y0, y1;
+	float m_crossingStart, m_crossingEnd, m_crossingNewStart, m_crossingNewEnd;
+	float m_yI, m_yJ;
 	
 protected:
-	MoveCrossingCommand(ArrowBox::Renderer& renderer, float crossingStart, float crossingEnd, float crossingNewStart, float crossingNewEnd, float yI, float yJ) :
-		ren(renderer), xingStart(ren.getBasex()+crossingStart), xingEnd(ren.getBasex()+crossingEnd),
-			xingNewStart(ren.getBasex()+crossingNewStart), xingNewEnd(ren.getBasex()+crossingNewEnd), y0(ren.getBasey()-yI), y1(ren.getBasey()-yJ) {}
+	MoveCrossingCommand(ArrowBox::Renderer& arrowBox, float crossingStart, float crossingEnd, float crossingNewStart, float crossingNewEnd, float yI, float yJ) :
+		m_arrowBox(arrowBox), m_crossingStart(arrowBox.getBasex()+crossingStart), m_crossingEnd(arrowBox.getBasex()+crossingEnd),
+			m_crossingNewStart(arrowBox.getBasex()+crossingNewStart), m_crossingNewEnd(arrowBox.getBasex()+crossingNewEnd),
+			m_yI(arrowBox.getBasey()-yI), m_yJ(arrowBox.getBasey()-yJ) {}
 	
 public:
 	virtual void run(RendererGL& rendererGL, float t);
 };
 
 class MoveCrossingCommandSlideArrow : public MoveCrossingCommand {
-	Arrow::Renderer* arw;
-	float arwFixPoint;
-	float arwT0y;
-	bool mvBegin;
-	bool flwTrackA;
+	Arrow::Renderer* m_arrow;
+	float m_arrowFixPoint;
+	float m_arrowT0y;
+	bool m_moveBegin;
+	bool m_followTrackA;
 	
-	MoveCrossingCommandSlideArrow(ArrowBox::Renderer& renderer, float crossingStart, float crossingEnd, float crossingNewStart, float crossingNewEnd,
+	MoveCrossingCommandSlideArrow(ArrowBox::Renderer& arrowBox, float crossingStart, float crossingEnd, float crossingNewStart, float crossingNewEnd,
 		float yI, float yJ, Arrow::Renderer* arrow, float arrowFixPoint, float arrowT0y, bool moveBegin, bool followTrackA) :
-			MoveCrossingCommand(renderer, crossingStart, crossingEnd, crossingNewStart, crossingNewEnd, yI, yJ), arw(arrow),
-			arwFixPoint(ren.getBasey()-arrowFixPoint), arwT0y(arrowT0y), mvBegin(moveBegin), flwTrackA(followTrackA) {}
+			MoveCrossingCommand(arrowBox, crossingStart, crossingEnd, crossingNewStart, crossingNewEnd, yI, yJ), m_arrow(arrow),
+			m_arrowFixPoint(arrowBox.getBasey()-arrowFixPoint), m_arrowT0y(arrowT0y), m_moveBegin(moveBegin), m_followTrackA(followTrackA) {}
 	
 public:
 	static MoveCrossingCommandSlideArrow* create(ArrowBox::Renderer& renderer, float crossingStart, float crossingEnd, float crossingNewStart,  float crossingNewEnd,
@@ -260,18 +261,19 @@ public:
 };
 
 class MoveCrossingCommandMoveArrow : public MoveCrossingCommand {
-	Arrow::Renderer* arw;
-	float arwXa, arwXb, arwY0, arwY1, arwT0y;
+	Arrow::Renderer* m_arrow;
+	float m_arrowXa, m_arrowXb, m_arrowY0, m_arrowY1, m_arrowT0y;
 	
-	MoveCrossingCommandMoveArrow(ArrowBox::Renderer& renderer, float crossingStart, float crossingEnd, float crossingNewStart, float crossingNewEnd,
+	MoveCrossingCommandMoveArrow(ArrowBox::Renderer& arrowBox, float crossingStart, float crossingEnd, float crossingNewStart, float crossingNewEnd,
 		float yI, float yJ, Arrow::Renderer* arrow, float arrowXa, float arrowXb, float arrowY0, float arrowY1, float arrowT0y) :
-			MoveCrossingCommand(renderer, crossingStart, crossingEnd, crossingNewStart, crossingNewEnd, yI, yJ), arw(arrow),
-			arwXa(ren.getBasex()+arrowXa), arwXb(ren.getBasex()+arrowXb), arwY0(ren.getBasey()-arrowY0), arwY1(ren.getBasey()-arrowY1), arwT0y(arrowT0y) {}
+			MoveCrossingCommand(arrowBox, crossingStart, crossingEnd, crossingNewStart, crossingNewEnd, yI, yJ), m_arrow(arrow),
+			m_arrowXa(arrowBox.getBasex()+arrowXa), m_arrowXb(arrowBox.getBasex()+arrowXb), m_arrowY0(arrowBox.getBasey()-arrowY0),
+			m_arrowY1(arrowBox.getBasey()-arrowY1), m_arrowT0y(arrowT0y) {}
 	
 public:
-	static MoveCrossingCommandMoveArrow* create(ArrowBox::Renderer& renderer, float crossingStart, float crossingEnd, float crossingNewStart, float crossingNewEnd,
+	static MoveCrossingCommandMoveArrow* create(ArrowBox::Renderer& arrowBox, float crossingStart, float crossingEnd, float crossingNewStart, float crossingNewEnd,
 			float yI, float yJ, Arrow::Renderer* arrow, float arrowXa, float arrowXb, float arrowY0, float arrowY1, float arrowT0y) {
-		return new MoveCrossingCommandMoveArrow(renderer, crossingStart, crossingEnd, crossingNewStart, crossingNewEnd, yI, yJ, arrow,
+		return new MoveCrossingCommandMoveArrow(arrowBox, crossingStart, crossingEnd, crossingNewStart, crossingNewEnd, yI, yJ, arrow,
 				arrowXa, arrowXb, arrowY0, arrowY1, arrowT0y);
 	}
 	
@@ -284,14 +286,14 @@ class MoveCrossingCommandInvertArrow : public MoveCrossingCommand {
 	Arrow::Renderer* m_arrow;
 	bool m_isUpArrow;
 	
-	MoveCrossingCommandInvertArrow(ArrowBox::Renderer& renderer, float crossingStart, float crossingEnd, float crossingNewStart, float crossingNewEnd,
+	MoveCrossingCommandInvertArrow(ArrowBox::Renderer& arrowBox, float crossingStart, float crossingEnd, float crossingNewStart, float crossingNewEnd,
 		float yI, float yJ, Arrow::Renderer* arrow, bool isUpArrow) :
-			MoveCrossingCommand(renderer, crossingStart, crossingEnd, crossingNewStart, crossingNewEnd, yI, yJ), m_arrow(arrow), m_isUpArrow(isUpArrow) {}
+			MoveCrossingCommand(arrowBox, crossingStart, crossingEnd, crossingNewStart, crossingNewEnd, yI, yJ), m_arrow(arrow), m_isUpArrow(isUpArrow) {}
 	
 public:
-	static MoveCrossingCommandInvertArrow* create(ArrowBox::Renderer& renderer, float crossingStart, float crossingEnd, float crossingNewStart, float crossingNewEnd,
+	static MoveCrossingCommandInvertArrow* create(ArrowBox::Renderer& arrowBox, float crossingStart, float crossingEnd, float crossingNewStart, float crossingNewEnd,
 			float yI, float yJ, Arrow::Renderer* arrow, bool isUpArrow) {
-		return new MoveCrossingCommandInvertArrow(renderer, crossingStart, crossingEnd, crossingNewStart, crossingNewEnd, yI, yJ, arrow, isUpArrow);
+		return new MoveCrossingCommandInvertArrow(arrowBox, crossingStart, crossingEnd, crossingNewStart, crossingNewEnd, yI, yJ, arrow, isUpArrow);
 	}
 	
 	virtual void run(RendererGL& rendererGL, float t);
@@ -300,17 +302,17 @@ public:
 };
 
 class FadeCrossingCommand : public Command<RendererGL&, float> {
-	ArrowBox::Renderer& ren;
-	float xingStart, xingEnd, xingFadeX;
-	float y0, y1;
+	ArrowBox::Renderer& m_arrowBox;
+	float m_crossingStart, m_crossingEnd, m_crossingFadeX;
+	float m_yI, m_yJ;
 	
-	FadeCrossingCommand(ArrowBox::Renderer& renderer, float crossingStart, float crossingEnd, float crossingFadeX, float yI, float yJ) :
-		ren(renderer), xingStart(crossingStart), xingEnd(crossingEnd), xingFadeX(crossingFadeX),
-				y0(renderer.getBasey()-yI), y1(renderer.getBasey()-yJ) {}
+	FadeCrossingCommand(ArrowBox::Renderer& arrowBox, float crossingStart, float crossingEnd, float crossingFadeX, float yI, float yJ) :
+		m_arrowBox(arrowBox), m_crossingStart(crossingStart), m_crossingEnd(crossingEnd), m_crossingFadeX(crossingFadeX),
+				m_yI(arrowBox.getBasey()-yI), m_yJ(arrowBox.getBasey()-yJ) {}
 	
 public:
-	static FadeCrossingCommand* create(ArrowBox::Renderer& renderer, float crossingStart, float crossingEnd, float crossingFadeX, float yI, float yJ) {
-		return new FadeCrossingCommand(renderer, crossingStart, crossingEnd, crossingFadeX, yI, yJ);
+	static FadeCrossingCommand* create(ArrowBox::Renderer& arrowBox, float crossingStart, float crossingEnd, float crossingFadeX, float yI, float yJ) {
+		return new FadeCrossingCommand(arrowBox, crossingStart, crossingEnd, crossingFadeX, yI, yJ);
 	}
 	
 	virtual void run(RendererGL& rendererGL, float t);
@@ -394,7 +396,7 @@ public:
 	void addCommand(Command<RendererGL&, float>* cmd, float cmdBegin, float cmdEnd);
 };
 
-class PassArrowsThroughtZeroHandle : public Command<RendererGL&> {
+class PassArrowsThroughtZeroHandleCommand : public Command<RendererGL&> {
 	struct MoveData {
 		ArrowInArrowBoxIndexed m_arrow;
 		ArrowBox& m_targetArrowBox;
@@ -410,9 +412,9 @@ class PassArrowsThroughtZeroHandle : public Command<RendererGL&> {
 	ArrowBox& m_arrowBox;
 	std::vector<MoveData> m_moveData;
 	
-	PassArrowsThroughtZeroHandle(ArrowBox& arrowBox) : m_arrowBox(arrowBox) {}
+	PassArrowsThroughtZeroHandleCommand(ArrowBox& arrowBox) : m_arrowBox(arrowBox) {}
 public:
-	static PassArrowsThroughtZeroHandle* create(ArrowBox& arrowBox) {return new PassArrowsThroughtZeroHandle(arrowBox);}
+	static PassArrowsThroughtZeroHandleCommand* create(ArrowBox& arrowBox) {return new PassArrowsThroughtZeroHandleCommand(arrowBox);}
 	
 	virtual void run(RendererGL& rendererGL);
 	
@@ -515,10 +517,10 @@ void postRemoveArrowFromArrowBoxCommand(ArrowBox& arrowBox, ArrowInArrowBoxIndex
 void postMoveArrowGenCrossingCommand(ArrowBox& arrowBox, ArrowInArrowBoxIndexed movingArrow, ArrowInArrowBoxIndexed targetArrow,
 		unsigned int crossingI, unsigned int crossingJ);
 void postMoveArrowToFirstArrowBoxCommand(OneHandle& oneHandle);
-void postMoveArrowToOtherArrowBox(OneHandle& oneHandle, ArrowBox& arrowBox, ArrowInArrowBoxIndexed arrow, unsigned int targetI, unsigned int targetJ);
-void postMoveArrowToOtherArrowBoxResolveCrossing(OneHandle& oneHandle, ArrowBox& arrowBox, ArrowInArrowBoxIndexed arrow, ArrowBox::ArrowInArrowBox& newArrow,
+void postMoveArrowToOtherArrowBoxCommand(OneHandle& oneHandle, ArrowBox& arrowBox, ArrowInArrowBoxIndexed arrow, unsigned int targetI, unsigned int targetJ);
+void postMoveArrowToOtherArrowBoxResolveCrossingCommand(OneHandle& oneHandle, ArrowBox& arrowBox, ArrowInArrowBoxIndexed arrow, ArrowBox::ArrowInArrowBox& newArrow,
 		unsigned int targetI, unsigned int targetJ);
-void postPassArrowsThroughtZeroHandle(PassArrowsThroughtZeroHandle* cmd);
+void postPassArrowsThroughtZeroHandleCommand(PassArrowsThroughtZeroHandleCommand* cmd);
 void postMoveArrowsAcrossZeroHandle(MoveArrowsAcrossZeroHandle* cmd);
 void postPushArrowCommand(ArrowBox& arrowBox, ArrowBox::ArrowInArrowBox& newArrow, unsigned int from, unsigned int to);
 

@@ -17,51 +17,51 @@
 static std::queue<Command<RendererGL&>*> displayQueue;
 static std::queue<Command<RendererGL&, float, float&>*> subCommandQueue;
 static pthread_mutex_t       displayMutex;
-static ZeroHandleRenderer* zeroHandle = nullptr;
+static ZeroHandleRenderer* zeroHandleCurrent = nullptr;
 
 void AnimateMoveArrowInArrowBoxCommand::addArrow(Arrow::Renderer& arrow, float p0x0, float p0y0, float p1x0, float p1y0, float t0x0, float t0y0, float t1x0, float t1y0,
 								float p0x1, float p0y1, float p1x1, float p1y1, float t0x1, float t0y1, float t1x1, float t1y1) {
-	const float x = arwBox.getBasex();
-	const float y = arwBox.getBasey();
+	const float x = m_arrowBox.getBasex();
+	const float y = m_arrowBox.getBasey();
 	
 	if (m_isAbsolute)
-		arrowsMoveData.emplace_back(std::piecewise_construct, std::forward_as_tuple(&arrow), std::forward_as_tuple(x+p0x0, y-p0y0, x+p1x0, y-p1y0, t0x0, t0y0, t1x0, t1y0,
+		m_arrowsMoveData.emplace_back(std::piecewise_construct, std::forward_as_tuple(&arrow), std::forward_as_tuple(x+p0x0, y-p0y0, x+p1x0, y-p1y0, t0x0, t0y0, t1x0, t1y0,
 								x+p0x1, y-p0y1, x+p1x1, y-p1y1, t0x1, t0y1, t1x1, t1y1));
 	else
-		arrowsMoveData.emplace_back(std::piecewise_construct, std::forward_as_tuple(&arrow), std::forward_as_tuple(p0x0, p0y0, p1x0, p1y0, t0x0, t0y0, t1x0, t1y0,
+		m_arrowsMoveData.emplace_back(std::piecewise_construct, std::forward_as_tuple(&arrow), std::forward_as_tuple(p0x0, p0y0, p1x0, p1y0, t0x0, t0y0, t1x0, t1y0,
 								p0x1, p0y1, p1x1, p1y1, t0x1, t0y1, t1x1, t1y1));
 }
 
 void AnimateMoveArrowInArrowBoxCommand::run(RendererGL& rendererGL, float t) {
-	const float x = arwBox.getBasex();
-	const float y = arwBox.getBasey();
+	const float x = m_arrowBox.getBasex();
+	const float y = m_arrowBox.getBasey();
 	float s = 1.0-t;
 	
-	for (size_t i=0; i<arrowsMoveData.size(); i++) {
-		MoveData& md = arrowsMoveData[i].second;
+	for (size_t i=0; i<m_arrowsMoveData.size(); i++) {
+		MoveData& md = m_arrowsMoveData[i].second;
 		if (m_isAbsolute)
-			arrowsMoveData[i].first->changePoints(s*md.p0x0+t*md.p0x1, s*md.p0y0+t*md.p0y1, s*md.p1x0+t*md.p1x1, s*md.p1y0+t*md.p1y1, 
-								s*md.t0x0+t*md.t0x1, s*md.t0y0+t*md.t0y1, s*md.t1x0+t*md.t1x1, s*md.t1y0+t*md.t1y1);
+			m_arrowsMoveData[i].first->changePoints(s*md.m_p0x0+t*md.m_p0x1, s*md.m_p0y0+t*md.m_p0y1, s*md.m_p1x0+t*md.m_p1x1, s*md.m_p1y0+t*md.m_p1y1, 
+								s*md.m_t0x0+t*md.m_t0x1, s*md.m_t0y0+t*md.m_t0y1, s*md.m_t1x0+t*md.m_t1x1, s*md.m_t1y0+t*md.m_t1y1);
 		else
-			arrowsMoveData[i].first->changePoints(x+(s*md.p0x0+t*md.p0x1), y-(s*md.p0y0+t*md.p0y1), x+(s*md.p1x0+t*md.p1x1), y-(s*md.p1y0+t*md.p1y1), 
-								s*md.t0x0+t*md.t0x1, s*md.t0y0+t*md.t0y1, s*md.t1x0+t*md.t1x1, s*md.t1y0+t*md.t1y1);
+			m_arrowsMoveData[i].first->changePoints(x+(s*md.m_p0x0+t*md.m_p0x1), y-(s*md.m_p0y0+t*md.m_p0y1), x+(s*md.m_p1x0+t*md.m_p1x1), y-(s*md.m_p1y0+t*md.m_p1y1),
+								s*md.m_t0x0+t*md.m_t0x1, s*md.m_t0y0+t*md.m_t0y1, s*md.m_t1x0+t*md.m_t1x1, s*md.m_t1y0+t*md.m_t1y1);
 	}
 }
 
 void AnimateMoveTrackLineArrowBox::addTrack(TrackLine& track, float p0x0, float p0y0, float p1x0, float p1y0, float p0x1, float p0y1, float p1x1, float p1y1) {
-	const float x = arwBox.getBasex();
-	const float y = arwBox.getBasey();
+	const float x = m_arrowBox.getBasex();
+	const float y = m_arrowBox.getBasey();
 	
-	trackMoveData.emplace_back(std::piecewise_construct, std::forward_as_tuple(&track),
+	m_trackMoveData.emplace_back(std::piecewise_construct, std::forward_as_tuple(&track),
 							   std::forward_as_tuple(x+p0x0, y-p0y0, x+p1x0, y-p1y0, x+p0x1, y-p0y1, x+p1x1, y-p1y1));
 }
 
 void AnimateMoveTrackLineArrowBox::run(RendererGL& rendererGL, float t) {
 	float s = 1.0-t;
 	
-	for (unsigned int i=0; i<trackMoveData.size(); i++) {
-		MoveData& md = trackMoveData[i].second;
-		trackMoveData[i].first->changePoints(s*md.p0x0+t*md.p0x1, s*md.p0y0+t*md.p0y1, s*md.p1x0+t*md.p1x1, s*md.p1y0+t*md.p1y1);
+	for (unsigned int i=0; i<m_trackMoveData.size(); i++) {
+		MoveData& md = m_trackMoveData[i].second;
+		m_trackMoveData[i].first->changePoints(s*md.m_p0x0+t*md.m_p0x1, s*md.m_p0y0+t*md.m_p0y1, s*md.m_p1x0+t*md.m_p1x1, s*md.m_p1y0+t*md.m_p1y1);
 	}
 }
 
@@ -77,18 +77,19 @@ void AnimateMoveArrowThroughtArrowBox::run(RendererGL& rendererGL, float t) {
 
 void AnimateMoveTrackPermutationBox::addTrack(TrackBezier& track, float p0x0, float p0y0, float p1x0, float p1y0, float p0x1, float p0y1, float p1x1, float p1y1,
 		Direction d0, Direction d1) {
-	trackMoveData.emplace_back(std::piecewise_construct, std::forward_as_tuple(&track),
+	m_trackMoveData.emplace_back(std::piecewise_construct, std::forward_as_tuple(&track),
 							   std::forward_as_tuple(p0x0, p0y0, p1x0, p1y0, p0x1, p0y1, p1x1, p1y1, d0, d1));
 }
 
 void AnimateMoveTrackPermutationBox::run(RendererGL& rendererGL, float t) {
 	float s = 1.0-t;
-	float x = perBox.getBasex();
-	float y = perBox.getBasey();
+	float x = m_permutationBox.getBasex();
+	float y = m_permutationBox.getBasey();
 	
-	for (unsigned int i=0; i<trackMoveData.size(); i++) {
-		MoveData& md = trackMoveData[i].second;
-		trackMoveData[i].first->changePoints(x+(s*md.p0x0+t*md.p0x1), y-(s*md.p0y0+t*md.p0y1), x+(s*md.p1x0+t*md.p1x1), y-(s*md.p1y0+t*md.p1y1), md.d0, md.d1);
+	for (unsigned int i=0; i<m_trackMoveData.size(); i++) {
+		MoveData& md = m_trackMoveData[i].second;
+		m_trackMoveData[i].first->changePoints(x+(s*md.m_p0x0+t*md.m_p0x1), y-(s*md.m_p0y0+t*md.m_p0y1), x+(s*md.m_p1x0+t*md.m_p1x1),
+											   y-(s*md.m_p1y0+t*md.m_p1y1), md.m_d0, md.m_d1);
 	}
 }
 
@@ -125,33 +126,33 @@ void AnimateInterpolateShowableBezierCurve::run(RendererGL& rendererGL, float t)
 
 void GenCrossingCommand::run(RendererGL& rendererGL, float t) {
 	float s = 1.0-t;
-	float xEnd = s*x0+t*x1;
+	float xEnd = s*m_xBegin+t*m_xEnd;
 	
 	
-	ren.getCrossing().m_crossA.changePoints(x0, y0, xEnd, y1, EAST, WEST);
-	ren.getCrossing().m_crossB.changePoints(x0, y1, xEnd, y0, EAST, WEST);
-	ren.getCrossing().m_lineA.changePoints (xEnd, y0, ren.endX(), y0);
-	ren.getCrossing().m_lineB.changePoints (xEnd, y1, ren.endX(), y1);
-	std::pair<std::reference_wrapper<TrackLine>, std::reference_wrapper<TrackLine>> tracks(ren.getCrossingTracks());
-	std::pair<float, float> tracksHeight(ren.getCrossingTracksHeight());
-	tracks.first.get().changePoints(ren.getBasex(), ren.getBasey()-tracksHeight.first, x0, ren.getBasey()-tracksHeight.first);
-	tracks.second.get().changePoints(ren.getBasex(), ren.getBasey()-tracksHeight.second, x0, ren.getBasey()-tracksHeight.second);
+	m_arrowBox.getCrossing().m_crossA.changePoints(m_xBegin, m_yI, xEnd, m_yJ, EAST, WEST);
+	m_arrowBox.getCrossing().m_crossB.changePoints(m_xBegin, m_yJ, xEnd, m_yI, EAST, WEST);
+	m_arrowBox.getCrossing().m_lineA.changePoints (xEnd, m_yI, m_arrowBox.endX(), m_yI);
+	m_arrowBox.getCrossing().m_lineB.changePoints (xEnd, m_yJ, m_arrowBox.endX(), m_yJ);
+	std::pair<std::reference_wrapper<TrackLine>, std::reference_wrapper<TrackLine>> tracks(m_arrowBox.getCrossingTracks());
+	std::pair<float, float> tracksHeight(m_arrowBox.getCrossingTracksHeight());
+	tracks.first.get().changePoints(m_arrowBox.getBasex(), m_arrowBox.getBasey()-tracksHeight.first, m_xBegin, m_arrowBox.getBasey()-tracksHeight.first);
+	tracks.second.get().changePoints(m_arrowBox.getBasex(), m_arrowBox.getBasey()-tracksHeight.second, m_xBegin, m_arrowBox.getBasey()-tracksHeight.second);
 }
 
 void MoveCrossingCommand::run(RendererGL& rendererGL, float t) {
 	float s = 1.0-t;
 	
-	float xBegin = s*xingStart + t*xingNewStart;
-	float xEnd   = s*xingEnd+t*xingNewEnd;
+	float xBegin = s*m_crossingStart + t*m_crossingNewStart;
+	float xEnd   = s*m_crossingEnd+t*m_crossingNewEnd;
 	
-	ren.getCrossing().m_crossA.changePoints(xBegin, y0, xEnd, y1, EAST, WEST);
-	ren.getCrossing().m_crossB.changePoints(xBegin, y1, xEnd, y0, EAST, WEST);
-	ren.getCrossing().m_lineA.changePoints (xEnd, y0, ren.endX(), y0);
-	ren.getCrossing().m_lineB.changePoints (xEnd, y1, ren.endX(), y1);
-	std::pair<std::reference_wrapper<TrackLine>, std::reference_wrapper<TrackLine>> tracks(ren.getCrossingTracks());
-	std::pair<float, float> tracksHeight(ren.getCrossingTracksHeight());
-	tracks.first.get().changePoints(ren.getBasex(), ren.getBasey()-tracksHeight.first, xBegin, ren.getBasey()-tracksHeight.first);
-	tracks.second.get().changePoints(ren.getBasex(), ren.getBasey()-tracksHeight.second, xBegin, ren.getBasey()-tracksHeight.second);
+	m_arrowBox.getCrossing().m_crossA.changePoints(xBegin, m_yI, xEnd, m_yJ, EAST, WEST);
+	m_arrowBox.getCrossing().m_crossB.changePoints(xBegin, m_yJ, xEnd, m_yI, EAST, WEST);
+	m_arrowBox.getCrossing().m_lineA.changePoints (xEnd, m_yI, m_arrowBox.endX(), m_yI);
+	m_arrowBox.getCrossing().m_lineB.changePoints (xEnd, m_yJ, m_arrowBox.endX(), m_yJ);
+	std::pair<std::reference_wrapper<TrackLine>, std::reference_wrapper<TrackLine>> tracks(m_arrowBox.getCrossingTracks());
+	std::pair<float, float> tracksHeight(m_arrowBox.getCrossingTracksHeight());
+	tracks.first.get().changePoints(m_arrowBox.getBasex(), m_arrowBox.getBasey()-tracksHeight.first, xBegin, m_arrowBox.getBasey()-tracksHeight.first);
+	tracks.second.get().changePoints(m_arrowBox.getBasex(), m_arrowBox.getBasey()-tracksHeight.second, xBegin, m_arrowBox.getBasey()-tracksHeight.second);
 }
 
 void MoveCrossingCommandSlideArrow::run(RendererGL& rendererGL, float t) {
@@ -160,22 +161,22 @@ void MoveCrossingCommandSlideArrow::run(RendererGL& rendererGL, float t) {
 	float s = 1.0-t;
 	
 	float x, y;
-	if (flwTrackA)
-		ren.getCrossing().m_crossA.getPoint(x, y, s);
+	if (m_followTrackA)
+		m_arrowBox.getCrossing().m_crossA.getPoint(x, y, s);
 	else
-		ren.getCrossing().m_crossB.getPoint(x, y, s);
+		m_arrowBox.getCrossing().m_crossB.getPoint(x, y, s);
 	
-	if (mvBegin)
-		arw->changePoints(x, y, x, arwFixPoint, 0.0, arwT0y, 0.0, -arwT0y);
+	if (m_moveBegin)
+		m_arrow->changePoints(x, y, x, m_arrowFixPoint, 0.0, m_arrowT0y, 0.0, -m_arrowT0y);
 	else
-		arw->changePoints(x, arwFixPoint, x, y, 0.0, arwT0y, 0.0, -arwT0y);
+		m_arrow->changePoints(x, m_arrowFixPoint, x, y, 0.0, m_arrowT0y, 0.0, -m_arrowT0y);
 }
 
 void MoveCrossingCommandMoveArrow::run(RendererGL& rendererGL, float t) {
 	MoveCrossingCommand::run(rendererGL, t);
 	
 	float s = 1.0-t;
-	arw->changePoints(s*arwXa+t*arwXb, arwY0, s*arwXa+t*arwXb, arwY1, 0.0, arwT0y, 0.0, -arwT0y);
+	m_arrow->changePoints(s*m_arrowXa+t*m_arrowXb, m_arrowY0, s*m_arrowXa+t*m_arrowXb, m_arrowY1, 0.0, m_arrowT0y, 0.0, -m_arrowT0y);
 }
 
 void MoveCrossingCommandInvertArrow::run(RendererGL& rendererGL, float t) {
@@ -185,8 +186,8 @@ void MoveCrossingCommandInvertArrow::run(RendererGL& rendererGL, float t) {
 	float x0, y0;
 	float x1, y1;
 	
-	ren.getCrossing().m_crossA.getPoint(x0, y0, s);
-	ren.getCrossing().m_crossB.getPoint(x1, y1, s);
+	m_arrowBox.getCrossing().m_crossA.getPoint(x0, y0, s);
+	m_arrowBox.getCrossing().m_crossB.getPoint(x1, y1, s);
 	if (!m_isUpArrow) {
 		std::swap(x0, x1); std::swap(y0, y1);
 	}
@@ -198,19 +199,19 @@ void MoveCrossingCommandInvertArrow::run(RendererGL& rendererGL, float t) {
 void FadeCrossingCommand::run(RendererGL& rendererGL, float t) {
 	float s = 1.0-t;
 	
-	float xBegin = ren.getBasex()+(s*xingStart + t*xingFadeX);
-	float xEnd   = ren.getBasex()+(s*xingEnd + t*xingFadeX);
-	float y0a = s*y0 + t*y1;
-	float y1a = s*y1 + t*y0;
+	float xBegin = m_arrowBox.getBasex()+(s*m_crossingStart + t*m_crossingFadeX);
+	float xEnd   = m_arrowBox.getBasex()+(s*m_crossingEnd + t*m_crossingFadeX);
+	float y0a = s*m_yI + t*m_yJ;
+	float y1a = s*m_yJ + t*m_yI;
 	
-	ren.getCrossing().m_crossA.changePoints(xBegin, y0, xEnd, y1a, EAST, WEST);
-	ren.getCrossing().m_crossB.changePoints(xBegin, y1, xEnd, y0a, EAST, WEST);
-	ren.getCrossing().m_lineA.changePoints (xEnd, y0a, ren.endX(), y0a);
-	ren.getCrossing().m_lineB.changePoints (xEnd, y1a, ren.endX(), y1a);
-	std::pair<std::reference_wrapper<TrackLine>, std::reference_wrapper<TrackLine>> tracks(ren.getCrossingTracks());
-	std::pair<float, float> tracksHeight(ren.getCrossingTracksHeight());
-	tracks.first.get().changePoints(ren.getBasex(), ren.getBasey()-tracksHeight.first, xBegin, ren.getBasey()-tracksHeight.first);
-	tracks.second.get().changePoints(ren.getBasex(), ren.getBasey()-tracksHeight.second, xBegin, ren.getBasey()-tracksHeight.second);
+	m_arrowBox.getCrossing().m_crossA.changePoints(xBegin, m_yI, xEnd, y1a, EAST, WEST);
+	m_arrowBox.getCrossing().m_crossB.changePoints(xBegin, m_yJ, xEnd, y0a, EAST, WEST);
+	m_arrowBox.getCrossing().m_lineA.changePoints (xEnd, y0a, m_arrowBox.endX(), y0a);
+	m_arrowBox.getCrossing().m_lineB.changePoints (xEnd, y1a, m_arrowBox.endX(), y1a);
+	std::pair<std::reference_wrapper<TrackLine>, std::reference_wrapper<TrackLine>> tracks(m_arrowBox.getCrossingTracks());
+	std::pair<float, float> tracksHeight(m_arrowBox.getCrossingTracksHeight());
+	tracks.first.get().changePoints(m_arrowBox.getBasex(), m_arrowBox.getBasey()-tracksHeight.first, xBegin, m_arrowBox.getBasey()-tracksHeight.first);
+	tracks.second.get().changePoints(m_arrowBox.getBasex(), m_arrowBox.getBasey()-tracksHeight.second, xBegin, m_arrowBox.getBasey()-tracksHeight.second);
 }
 
 void MoveArrowThroughtZeroHandleCommand::run(RendererGL& rendererGL, float t) {
@@ -305,16 +306,7 @@ class SynchronousSubTaskCommand : public Command<RendererGL&, float, float&> {
 public:
 	static SynchronousSubTaskCommand* create(float duration) {return new SynchronousSubTaskCommand(duration);}
 	
-	virtual void run(RendererGL& rendererGL, float dt, float& pastTime) {
-		m_t+=dt;
-		pastTime = m_t-m_duration;
-		
-		if (pastTime < 0.0){
-			float p = m_t/m_duration;
-			for (auto it=m_tasks.begin(); it!=m_tasks.end(); it++)
-				it->m_cmd->run(rendererGL, p);
-		}
-	}
+	virtual void run(RendererGL& rendererGL, float dt, float& pastTime);
 	
 	virtual std::string name() const {return "SynchronousSubTaskCommand";}
 	
@@ -336,68 +328,54 @@ public:
 		return new RefreshArrowBoxCommand(arrowBox, refreshLenght, refreshTracks);
 	}
 	
-	virtual void run(RendererGL& rendererGL, float dt, float& pastTime) {
-		m_arrowBox.refreshArrows();
-		if (m_refreshLenght) m_arrowBox.refreshLenght();
-		if (m_refreshTracks) m_arrowBox.refreshTracks();
-		pastTime = 0.0;
-	}
+	virtual void run(RendererGL& rendererGL, float dt, float& pastTime);
 	
 	virtual std::string name() const {return "RefreshArrowBoxCommand";}
 };
 
 class RefreshPermutationBoxCommand : public Command<RendererGL&, float, float&> {
-	PermutationBox::Renderer& perBox;
+	PermutationBox::Renderer& m_permutationBox;
 	
-	RefreshPermutationBoxCommand(PermutationBox::Renderer& permutationBox) : perBox(permutationBox) {}
+	RefreshPermutationBoxCommand(PermutationBox::Renderer& permutationBox) : m_permutationBox(permutationBox) {}
 	
 public:
 	static Command<RendererGL&, float, float&>* create(PermutationBox::Renderer& permutationBox) {
 		return new RefreshPermutationBoxCommand(permutationBox);
 	}
 	
-	virtual void run(RendererGL& rendererGL, float dt, float& pastTime) {
-		perBox.refresh();
-		pastTime = 0.0;
-	}
+	virtual void run(RendererGL& rendererGL, float dt, float& pastTime);
 	
 	virtual std::string name() const {return "RefreshPermutationBoxCommand";}
 };
 
 class RemoveArrowCommand : public Command<RendererGL&, float, float&> {
-	ArrowBox::Renderer& arwBox;
-	ArrowBox::ArrowInArrowBox& arw;
+	ArrowBox::Renderer& m_arrowBox;
+	ArrowBox::ArrowInArrowBox& m_arrow;
 	
-	RemoveArrowCommand(ArrowBox::Renderer& arrowBox, ArrowBox::ArrowInArrowBox& arrow) : arwBox(arrowBox), arw(arrow) {}
+	RemoveArrowCommand(ArrowBox::Renderer& arrowBox, ArrowBox::ArrowInArrowBox& arrow) : m_arrowBox(arrowBox), m_arrow(arrow) {}
 	
 public:
 	static Command<RendererGL&, float, float&>* create(ArrowBox::Renderer& arrowBox, ArrowBox::ArrowInArrowBox& arrow) {
 		return new RemoveArrowCommand(arrowBox, arrow);
 	}
 	
-	virtual void run(RendererGL& rendererGL, float dt, float& pastTime) {
-		arwBox.removeArrow(arw);
-		pastTime = 0.0;
-	}
+	virtual void run(RendererGL& rendererGL, float dt, float& pastTime);
 	
 	virtual std::string name() const {return "RemoveArrowCommand";}
 };
 
 class RemoveCrossingCommand : public Command<RendererGL&, float, float&> {
-	ArrowBox::Renderer& ren;
+	ArrowBox::Renderer& m_arrowBox;
 	
-	RemoveCrossingCommand(ArrowBox::Renderer& renderer) : ren(renderer) {}
+	RemoveCrossingCommand(ArrowBox::Renderer& arrowBox) : m_arrowBox(arrowBox) {}
 	
 public:
-	static Command<RendererGL&, float, float&>* create(ArrowBox::Renderer& renderer) {
-		return new RemoveCrossingCommand(renderer);
+	static Command<RendererGL&, float, float&>* create(ArrowBox::Renderer& arrowBox) {
+		return new RemoveCrossingCommand(arrowBox);
 		
 	}
 	
-	virtual void run(RendererGL& rendererGL, float dt, float& pastTime) {
-		ren.deleteCrossing();
-		pastTime = 0.0;
-	}
+	virtual void run(RendererGL& rendererGL, float dt, float& pastTime);
 	
 	virtual std::string name() const {return "RemoveCrossingCommand";}
 };
@@ -412,81 +390,47 @@ public:
 		m_curves.push_back(&curve);
 	}
 	
-	virtual void run(RendererGL& rendererGL, float dt, float& pastTime) {
-		for (size_t i=0; i<m_curves.size(); i++)
-			delete m_curves[i];
-		
-		m_curves.clear();
-		pastTime=0.0;
-	}
+	virtual void run(RendererGL& rendererGL, float dt, float& pastTime);
 	
 	virtual std::string name() const {return "RemoveTrackCommand";}
 };
 
-std::pair<int, bool> pushMoveSubcommand(ArrowBox& arrowBox, ArrowInArrowBoxIndexed movingArrow, ArrowInArrowBoxIndexed targetArrow) {
-	int n = targetArrow.second - movingArrow.second;
-	
-	bool forward = false;
-	if (n>0) {
-		n--; forward = true;
-	} else n++;
-	if (n != 0) {
-		SynchronousSubTaskCommand* cmd = SynchronousSubTaskCommand::create(std::abs(n)/3.0);
-		AnimateMoveArrowInArrowBoxCommand* anim = AnimateMoveArrowInArrowBoxCommand::create(arrowBox.getRenderer(), false);
-		cmd->addCommand(anim);
-		arrowBox.getRenderer().moveArrow(movingArrow.first.get().getArrowRendererInList(), movingArrow.second, n, anim);
-		subCommandQueue.push(cmd);
-	}
-	
-	return std::make_pair(n, forward);
-}
-
-
-
 class DeleteZeroHandleCommand : public Command<RendererGL&> {
-	ZeroHandle& handle;
+	ZeroHandle& m_zeroHandle;
 	
-	DeleteZeroHandleCommand(ZeroHandle& zeroHandle) : handle(zeroHandle) {}
+	DeleteZeroHandleCommand(ZeroHandle& zeroHandle) : m_zeroHandle(zeroHandle) {}
 	
 public:
 	static Command<RendererGL&>* create(ZeroHandle& zeroHandle) {return new DeleteZeroHandleCommand(zeroHandle);}
 	
-	virtual void run(RendererGL& rendererGL) {
-		assert(&handle.getRenderer() == zeroHandle);
-		delete &handle.getRenderer();
-		delete &handle;
-		zeroHandle = nullptr;
-	}
+	virtual void run(RendererGL& rendererGL);
 	
 	virtual std::string name() const {return "DeleteZeroHandleCommand";}
 };
 
 class DrawZeroHandleCommand : public Command<RendererGL&> {
 private:
-	const Pairing pairing;
-	ZeroHandle& handle;
-	std::list<std::pair<unsigned int, unsigned int>> voidArwData;
-	std::list<ArrowBox::ArrowInArrowBox*> voidArw;
-	std::list<std::pair<unsigned int, unsigned int>> fullArwData;
-	std::list<ArrowBox::ArrowInArrowBox*> fullArw;
+	const Pairing m_pairing;
+	ZeroHandle& m_zeroHandle;
+	std::list<std::pair<unsigned int, unsigned int>> m_voidArrowsData;
+	std::list<ArrowBox::ArrowInArrowBox*> m_voidArrows;
+	std::list<std::pair<unsigned int, unsigned int>> m_fullArrowsData;
+	std::list<ArrowBox::ArrowInArrowBox*> m_fullArrows;
 	
-	DrawZeroHandleCommand(Pairing handlePairing, ZeroHandle& zeroHandle,
+	DrawZeroHandleCommand(Pairing pairing, ZeroHandle& zeroHandle,
 		std::list<std::pair<unsigned int, unsigned int>>&& voidArrowsData, std::list<ArrowBox::ArrowInArrowBox*>&& voidArrows,
 		std::list<std::pair<unsigned int, unsigned int>>&& fullArrowsData, std::list<ArrowBox::ArrowInArrowBox*>&& fullArrows) : 
-		pairing(handlePairing), handle(zeroHandle), voidArwData(std::move(voidArrowsData)), voidArw(std::move(voidArrows)),
-				fullArwData(std::move(fullArrowsData)), fullArw(std::move(fullArrows)) {}
+		m_pairing(pairing), m_zeroHandle(zeroHandle), m_voidArrowsData(std::move(voidArrowsData)), m_voidArrows(std::move(voidArrows)),
+				m_fullArrowsData(std::move(fullArrowsData)), m_fullArrows(std::move(fullArrows)) {}
 	
 public:
-	static Command<RendererGL&>* create(Pairing handlePairing, ZeroHandle& zeroHandle,
+	static Command<RendererGL&>* create(Pairing pairing, ZeroHandle& zeroHandle,
 			std::list<std::pair<unsigned int, unsigned int>>&& voidArrowsData, std::list<ArrowBox::ArrowInArrowBox*>&& voidArrows,
 			std::list<std::pair<unsigned int, unsigned int>>&& fullArrowsData, std::list<ArrowBox::ArrowInArrowBox*>&& fullArrows)
-	{return new DrawZeroHandleCommand(handlePairing, zeroHandle, std::move(voidArrowsData), std::move(voidArrows),
+	{return new DrawZeroHandleCommand(pairing, zeroHandle, std::move(voidArrowsData), std::move(voidArrows),
 				std::move(fullArrowsData), std::move(fullArrows));}
 	
-	virtual void run(RendererGL& rendererGL) {
-		assert(zeroHandle == nullptr);
-		zeroHandle = new ZeroHandleRenderer(rendererGL, pairing, handle, voidArwData, voidArw, fullArwData, fullArw);
-	}
+	virtual void run(RendererGL& rendererGL);
 	
 	virtual std::string name() const {return "DrawZeroHandleCommand";}
 };
@@ -505,74 +449,41 @@ public:
 		return new PermuteArrowBoxCommand(permutation, oneHandle, isFirstArrowBox);
 	}
 	
-	virtual void run(RendererGL& rendererGL) {
-		OneHandleRenderer& oneHandle = m_oneHandle.getRenderer();
-		ArrowBox::Renderer& arrowBox = (m_isFirstArrowBox) ? oneHandle.getFirstArrowBox() : oneHandle.getSecondArrowBox();
-		PermutationBox::Renderer& permutation = oneHandle.getPermutation();
-		PermutationBox::Renderer& sidePermutation = (m_isFirstArrowBox) ? oneHandle.getPrePermutation() : oneHandle.getPostPermutation();
-		
-		SynchronousSubTaskCommand* cmd = SynchronousSubTaskCommand::create(10.0/3.0);
-		AnimateMoveTrackLineArrowBox*      animArrowTrack     = AnimateMoveTrackLineArrowBox::create(arrowBox);
-		AnimateMoveArrowInArrowBoxCommand* animArrows         = AnimateMoveArrowInArrowBoxCommand::create(arrowBox, true);
-		AnimateMoveTrackPermutationBox*    animPrePermutation = AnimateMoveTrackPermutationBox::create(sidePermutation);
-		AnimateMoveTrackPermutationBox*    animPermutation    = AnimateMoveTrackPermutationBox::create(permutation);
-		cmd->addCommand(animArrowTrack); cmd->addCommand(animArrows); cmd->addCommand(animPrePermutation); cmd->addCommand(animPermutation);
-		
-		arrowBox.permuteTracks(m_permutation.getPermutation(), animArrowTrack, animArrows);
-		if (!m_isFirstArrowBox) m_permutation.inverse();
-		sidePermutation.permute(m_permutation, animPrePermutation, m_isFirstArrowBox);
-		m_permutation.inverse();
-		permutation.permute(m_permutation, animPermutation, !m_isFirstArrowBox);
-		if (m_isFirstArrowBox) m_permutation.inverse();
-		
-		subCommandQueue.push(cmd);
-		subCommandQueue.push(RefreshPermutationBoxCommand::create(sidePermutation));
-		subCommandQueue.push(RefreshArrowBoxCommand::create(arrowBox, false, true));
-		subCommandQueue.push(RefreshPermutationBoxCommand::create(permutation));
-	}
+	virtual void run(RendererGL& rendererGL);
 	
 	virtual std::string name() const {return "PermuteArrowBoxCommand";}
 };
 
 class MoveArrowInArrowBoxCommand : public Command<RendererGL&> {
 private:
-	ArrowBox& arwBox;
-	ArrowInArrowBoxIndexed movingArw;
-	ArrowInArrowBoxIndexed targetArw;
+	ArrowBox& m_arrowBox;
+	ArrowInArrowBoxIndexed m_movingArrow;
+	ArrowInArrowBoxIndexed m_targetArrow;
 	
-	MoveArrowInArrowBoxCommand(ArrowBox& arrowBox, ArrowInArrowBoxIndexed movingArrow, ArrowInArrowBoxIndexed targetArrow) : arwBox(arrowBox), movingArw(movingArrow), targetArw(targetArrow) {assert(movingArrow.second!=targetArrow.second);}
+	MoveArrowInArrowBoxCommand(ArrowBox& arrowBox, ArrowInArrowBoxIndexed movingArrow, ArrowInArrowBoxIndexed targetArrow) : 
+			m_arrowBox(arrowBox), m_movingArrow(movingArrow), m_targetArrow(targetArrow) {assert(movingArrow.second!=targetArrow.second);}
 	
 public:
 	static Command<RendererGL&>* create(ArrowBox& arrowBox, ArrowInArrowBoxIndexed movingArrow, ArrowInArrowBoxIndexed targetArrow)
 		{return new MoveArrowInArrowBoxCommand(arrowBox, movingArrow, targetArrow);}
 	
-	virtual void run(RendererGL& rendererGL) {
-		int n = targetArw.second - movingArw.second;
-		
-		SynchronousSubTaskCommand* cmd = SynchronousSubTaskCommand::create(std::abs(n)/3.0);
-		AnimateMoveArrowInArrowBoxCommand* anim = AnimateMoveArrowInArrowBoxCommand::create(arwBox.getRenderer(), false);
-		cmd->addCommand(anim);
-		
-		arwBox.getRenderer().moveArrow(movingArw.first.get().getArrowRendererInList(), movingArw.second, n, anim);
-		subCommandQueue.push(cmd);
-		subCommandQueue.push(RefreshArrowBoxCommand::create(arwBox.getRenderer(), false));
-	}
+	virtual void run(RendererGL& rendererGL);
 	
 	virtual std::string name() const {return "MoveArrowInArrowBoxCommand";}
 };
 
 class GenArrowAfterMoveCrossingCommand : public Command<RendererGL&> {
 private:
-	ArrowBox& arwBox;
-	ArrowInArrowBoxIndexed movingArw;
-	ArrowInArrowBoxIndexed targetArw;
-	ArrowBox::ArrowInArrowBox& newArw;
-	unsigned int begin, end;
-	bool after;
+	ArrowBox& m_arrowBox;
+	ArrowInArrowBoxIndexed m_movingArrow;
+	ArrowInArrowBoxIndexed m_targetArrow;
+	ArrowBox::ArrowInArrowBox& m_newArrow;
+	unsigned int m_from, m_to;
+	bool m_genAfter;
 	
 	GenArrowAfterMoveCrossingCommand(ArrowBox& arrowBox, ArrowInArrowBoxIndexed movingArrow, ArrowInArrowBoxIndexed targetArrow,
 		ArrowBox::ArrowInArrowBox& newArrow, unsigned int from, unsigned int to, bool genAfter) :
-			arwBox(arrowBox), movingArw(movingArrow), targetArw(targetArrow), newArw(newArrow), begin(from), end(to), after(genAfter)
+			m_arrowBox(arrowBox), m_movingArrow(movingArrow), m_targetArrow(targetArrow), m_newArrow(newArrow), m_from(from), m_to(to), m_genAfter(genAfter)
 	{assert(movingArrow.second != targetArrow.second);}
 
 public:
@@ -581,72 +492,26 @@ public:
 		return new GenArrowAfterMoveCrossingCommand(arrowBox, movingArrow, targetArrow, newArrow, from, to, genAfter);
 	}
 	
-	virtual void run(RendererGL& rendererGL) {
-		
-		std::pair<int, bool> moveData = pushMoveSubcommand(arwBox, movingArw, targetArw);
-		bool& forward(moveData.second);
-		
-		SynchronousSubTaskCommand*         cmd0     = SynchronousSubTaskCommand::create(0.5/3.0);
-		AnimateMoveArrowInArrowBoxCommand* anim0    = AnimateMoveArrowInArrowBoxCommand::create(arwBox.getRenderer(), false);
-		cmd0->addCommand(anim0);
-		
-		SynchronousSubTaskCommand*         cmd1     = SynchronousSubTaskCommand::create(1.5/3.0);
-		AnimateMoveArrowInArrowBoxCommand* anim1    = AnimateMoveArrowInArrowBoxCommand::create(arwBox.getRenderer(), false);
-		UpdateArrowBoxLenghtCommand*       lenAnim1 = UpdateArrowBoxLenghtCommand::create(arwBox.getRenderer());
-		cmd1->addCommand(lenAnim1); cmd1->addCommand(anim1);
-		
-		if (forward)
-			arwBox.getRenderer().spawnArrowAfterCrossingForward (rendererGL, targetArw.first.get().getArrowRendererInList(), newArw, targetArw.second,
-					begin, end, anim0, anim1, lenAnim1, after);
-		else
-			arwBox.getRenderer().spawnArrowAfterCrossingBackward(rendererGL, targetArw.first.get().getArrowRendererInList(), newArw, targetArw.second,
-					begin, end, anim0, anim1, lenAnim1, after);
-		
-		subCommandQueue.push(cmd0);
-		subCommandQueue.push(cmd1);
-		subCommandQueue.push(RefreshArrowBoxCommand::create(arwBox.getRenderer(), true));
-	}
+	virtual void run(RendererGL& rendererGL);
 	
 	virtual std::string name() const {return "GenArrowAfterMoveCrossingCommand";}
 };
 
 class MoveMergeArrowsCommand : public Command<RendererGL&> {
 private:
-	ArrowBox& arwBox;
-	ArrowInArrowBoxIndexed movingArw;
-	ArrowInArrowBoxIndexed targetArw;
+	ArrowBox& m_arrowBox;
+	ArrowInArrowBoxIndexed m_movingArrow;
+	ArrowInArrowBoxIndexed m_targetArrow;
 	
 	MoveMergeArrowsCommand(ArrowBox& arrowBox, ArrowInArrowBoxIndexed movingArrow, ArrowInArrowBoxIndexed targetArrow) :
-		arwBox(arrowBox), movingArw(movingArrow), targetArw(targetArrow) {assert(targetArrow.second!=movingArrow.second);}
+		m_arrowBox(arrowBox), m_movingArrow(movingArrow), m_targetArrow(targetArrow) {assert(targetArrow.second!=movingArrow.second);}
 	
 public:
 	static Command<RendererGL&>* create(ArrowBox& arrowBox, ArrowInArrowBoxIndexed movingArrow, ArrowInArrowBoxIndexed targetArrow) {
 		return new MoveMergeArrowsCommand(arrowBox, movingArrow, targetArrow);
 	}
 	
-	virtual void run(RendererGL& rendererGL) {
-		std::pair<int, bool> moveData = pushMoveSubcommand(arwBox, movingArw, targetArw);
-		bool& forward(moveData.second);
-		
-		SynchronousSubTaskCommand*         cmd0     = SynchronousSubTaskCommand::create(0.5/3.0);
-		AnimateMoveArrowInArrowBoxCommand* anim0    = AnimateMoveArrowInArrowBoxCommand::create(arwBox.getRenderer(), false);
-		UpdateArrowBoxLenghtCommand*       lenAnim0 = UpdateArrowBoxLenghtCommand::create(arwBox.getRenderer());
-		cmd0->addCommand(lenAnim0); cmd0->addCommand(anim0);
-		
-		SynchronousSubTaskCommand*         cmd1     = SynchronousSubTaskCommand::create(1.5/3.0);
-		AnimateMoveArrowInArrowBoxCommand* anim1    = AnimateMoveArrowInArrowBoxCommand::create(arwBox.getRenderer(), false);
-		UpdateArrowBoxLenghtCommand*       lenAnim1 = UpdateArrowBoxLenghtCommand::create(arwBox.getRenderer());
-		cmd1->addCommand(lenAnim1); cmd1->addCommand(anim1);
-		
-		std::pair<std::list<Arrow::Renderer>::iterator, std::list<Arrow::Renderer>::iterator> arrows;
-		arwBox.getRenderer().mergeArrows(rendererGL, targetArw.first.get().getArrowRendererInList(), targetArw.second, anim0, lenAnim0, anim1, lenAnim1, forward);
-		
-		subCommandQueue.push(cmd0);
-		subCommandQueue.push(RemoveArrowCommand::create(arwBox.getRenderer(), movingArw.first));
-		subCommandQueue.push(RemoveArrowCommand::create(arwBox.getRenderer(), targetArw.first));
-		subCommandQueue.push(cmd1);
-		subCommandQueue.push(RefreshArrowBoxCommand::create(arwBox.getRenderer(), true));
-	}
+	virtual void run(RendererGL& rendererGL);
 	
 	virtual std::string name() const {return "MoveMergeArrowsCommand";}
 };
@@ -660,36 +525,21 @@ class RemoveArrowFromArrowBoxCommand : public Command<RendererGL&> {
 public:
 	static Command<RendererGL&>* create(ArrowBox& arrowBox, ArrowInArrowBoxIndexed arrow) {return new RemoveArrowFromArrowBoxCommand(arrowBox, arrow);}
 	
-	virtual void run(RendererGL& rendererGL) {
-		ArrowBox::Renderer& arrowBox = m_arrowBox.getRenderer();
-		ArrowBox::ArrowRendererInList arrowInList = m_arrow.first.get().getArrowRendererInList();
-		int& index = m_arrow.second;
-		
-		SynchronousSubTaskCommand* cmd0 = SynchronousSubTaskCommand::create(1.0/3.0);
-		AnimateMoveArrowInArrowBoxCommand* anim0    = AnimateMoveArrowInArrowBoxCommand::create(arrowBox, false);
-		UpdateArrowBoxLenghtCommand*       lenAnim0 = UpdateArrowBoxLenghtCommand::create(arrowBox);
-		cmd0->addCommand(lenAnim0); cmd0->addCommand(anim0);
-		
-		arrowBox.removeArrow(rendererGL, arrowInList, index, anim0, lenAnim0);
-		
-		subCommandQueue.push(RemoveArrowCommand::create(arrowBox, m_arrow.first));
-		subCommandQueue.push(cmd0);
-		subCommandQueue.push(RefreshArrowBoxCommand::create(arrowBox, true));
-	}
+	virtual void run(RendererGL& rendererGL);
 	
 	virtual std::string name() const {return "RemoveArrowFromArrowBoxCommand";}
 };
 
 class MoveArrowGenCrossingCommand : public Command<RendererGL&> {
 private:
-	ArrowBox& arwBox;
-	ArrowInArrowBoxIndexed movingArw;
-	ArrowInArrowBoxIndexed targetArw;
-	unsigned int crossI, crossJ;
+	ArrowBox& m_arrowBox;
+	ArrowInArrowBoxIndexed m_movingArrow;
+	ArrowInArrowBoxIndexed m_targetArrow;
+	unsigned int m_crossingI, m_crossingJ;
 	
 	MoveArrowGenCrossingCommand(ArrowBox& arrowBox, ArrowInArrowBoxIndexed movingArrow, ArrowInArrowBoxIndexed targetArrow,
 		unsigned int crossingI, unsigned int crossingJ) :
-			arwBox(arrowBox), movingArw(movingArrow), targetArw(targetArrow), crossI(crossingI), crossJ(crossingJ)
+			m_arrowBox(arrowBox), m_movingArrow(movingArrow), m_targetArrow(targetArrow), m_crossingI(crossingI), m_crossingJ(crossingJ)
 		{assert(targetArrow.second!=movingArrow.second);}
 	
 public:
@@ -698,45 +548,7 @@ public:
 		return new MoveArrowGenCrossingCommand(arrowBox, movingArrow, targetArrow, crossingI, crossingJ);
 	}
 	
-	virtual void run(RendererGL& rendererGL) {
-		assert(&(arwBox.getRenderer()) == &(arwBox.getRenderer().getOneHandle().getFirstArrowBox()));
-		
-		std::pair<int, bool> moveData = pushMoveSubcommand(arwBox, movingArw, targetArw);
-		bool& forward(moveData.second);
-		assert(forward);
-		
-		SynchronousSubTaskCommand*         cmd0  = SynchronousSubTaskCommand::create(1.0/3.0);
-		AnimateMoveArrowInArrowBoxCommand* anim0 = AnimateMoveArrowInArrowBoxCommand::create(arwBox.getRenderer(), false);
-		cmd0->addCommand(anim0);
-		
-		SynchronousSubTaskCommand* cmd1 = SynchronousSubTaskCommand::create(1.0/3.0);
-		GenCrossingCommand*        anim1 = nullptr;
-		
-		std::vector<MoveCrossingCommand*> anims2;
-		FadeCrossingCommand* anim3 = nullptr;
-		arwBox.getRenderer().genCrossing(rendererGL, targetArw.first.get().getArrowRendererInList(), targetArw.second, anim0, anim1, anims2, anim3, crossI, crossJ);
-		cmd1->addCommand(anim1);
-		
-		subCommandQueue.push(cmd0);
-		subCommandQueue.push(RemoveArrowCommand::create(arwBox.getRenderer(), movingArw.first));
-		subCommandQueue.push(cmd1);
-		
-		for (size_t i=0; i<anims2.size(); i++) {
-			SynchronousSubTaskCommand* cmd = SynchronousSubTaskCommand::create(1.0/3.0);
-			cmd->addCommand(anims2[i]);
-			subCommandQueue.push(cmd);
-		}
-		
-		SynchronousSubTaskCommand*      cmd3  = SynchronousSubTaskCommand::create(1.0/3.0);
-		UpdateArrowBoxLenghtCommand*    animLen3 = UpdateArrowBoxLenghtCommand::create(arwBox.getRenderer());
-		animLen3->setVariation(arwBox.getRenderer().lenght(), arwBox.getRenderer().lenght()-ArrowBox::Renderer::arrowSeparation());
-		AnimateMoveTrackPermutationBox* animPer3 = AnimateMoveTrackPermutationBox::create(arwBox.getRenderer().getOneHandle().getPermutation());
-		arwBox.getRenderer().getOneHandle().getPermutation().permute(std::make_pair(crossI, crossJ), animPer3, false);
-		cmd3->addCommand(animLen3); cmd3->addCommand(animPer3); cmd3->addCommand(anim3);
-		subCommandQueue.push(cmd3);
-		subCommandQueue.push(RemoveCrossingCommand::create(arwBox.getRenderer()));
-		subCommandQueue.push(RefreshArrowBoxCommand::create(arwBox.getRenderer(), true));
-	}
+	virtual void run(RendererGL& rendererGL);
 	
 	virtual std::string name() const {return "MoveArrowGenCrossingCommand";}
 };
@@ -751,427 +563,57 @@ public:
 		return new MoveArrowToFirstArrowBoxCommand(oneHandle);
 	}
 	
-	virtual void run(RendererGL& rendererGL) {
-		OneHandleRenderer& oneHandle = m_oneHandle.getRenderer();
-		ArrowBox::Renderer& firstBox = oneHandle.getFirstArrowBox();
-		ArrowBox::Renderer& secondBox = oneHandle.getSecondArrowBox();
-		
-		AsynchronousSubTaskCommand* cmd0 = AsynchronousSubTaskCommand::create();
-		float arrowBox0Lenght = firstBox.lenght();
-		float arrowBox1Lenght = secondBox.lenght();
-		float duration = arrowBox1Lenght/(3.0*ArrowBox::Renderer::arrowSeparation());
-		UpdateArrowBoxLenghtCommand* animLen0 = UpdateArrowBoxLenghtCommand::create(firstBox, false);
-		animLen0->setVariation(arrowBox0Lenght, arrowBox0Lenght+arrowBox1Lenght);
-		UpdateArrowBoxLenghtCommand* animLen1 = UpdateArrowBoxLenghtCommand::create(secondBox, false);
-		animLen1->setVariation(arrowBox1Lenght, 0.0);
-		cmd0->addCommand(animLen0, 0.0, duration); cmd0->addCommand(animLen1, 0.0, duration);
-		
-		oneHandle.transferArrowsToFirstArrowBox(cmd0, duration);
-		subCommandQueue.push(cmd0);
-		subCommandQueue.push(RefreshArrowBoxCommand::create(firstBox, true));
-		subCommandQueue.push(RefreshArrowBoxCommand::create(secondBox, true));
-	}
+	virtual void run(RendererGL& rendererGL);
 	
 	virtual std::string name() const {return "MoveArrowToFirstArrowBoxCommand";}
 };
 
-class MoveArrowToOtherArrowBox : public Command<RendererGL&> {
+class MoveArrowToOtherArrowBoxCommand : public Command<RendererGL&> {
 	OneHandle& m_oneHandle;
 	ArrowBox&  m_arrowBox;
 	ArrowInArrowBoxIndexed m_arrow;
 	unsigned int m_targetI, m_targetJ;
 	
-	MoveArrowToOtherArrowBox(OneHandle& oneHandle, ArrowBox& arrowBox, ArrowInArrowBoxIndexed arrow, unsigned int targetI, unsigned int targetJ) :
+	MoveArrowToOtherArrowBoxCommand(OneHandle& oneHandle, ArrowBox& arrowBox, ArrowInArrowBoxIndexed arrow, unsigned int targetI, unsigned int targetJ) :
 		m_oneHandle(oneHandle), m_arrowBox(arrowBox), m_arrow(arrow), m_targetI(targetI), m_targetJ(targetJ) {}
 	
 public:
 	static Command<RendererGL&>* create(OneHandle& oneHandle, ArrowBox& arrowBox, ArrowInArrowBoxIndexed arrow, unsigned int targetI, unsigned int targetJ) {
-		return new MoveArrowToOtherArrowBox(oneHandle, arrowBox, arrow, targetI, targetJ);
+		return new MoveArrowToOtherArrowBoxCommand(oneHandle, arrowBox, arrow, targetI, targetJ);
 	}
 	
-	virtual void run(RendererGL& rendererGL) {
-		OneHandleRenderer&  oneHandle = m_oneHandle.getRenderer();
-		ArrowBox::Renderer& box = m_arrowBox.getRenderer();
-		
-		const bool isFirstArrowBox = (&box == &(oneHandle.getFirstArrowBox()));
-		assert((&box == &(oneHandle.getSecondArrowBox())) || isFirstArrowBox);
-		
-		ArrowBox::Renderer& otherBox = (isFirstArrowBox) ? oneHandle.getSecondArrowBox() : oneHandle.getFirstArrowBox();
-		PermutationBox::Renderer& permutation = oneHandle.getPermutation();
-		ArrowBox::ArrowRendererInList arrowRen = m_arrow.first.get().getArrowRendererInList();
-		const unsigned int arrowBegin = arrowRen->begin();
-		const unsigned int arrowEnd   = arrowRen->end();
-		const int& arrowPos = m_arrow.second;
-		
-		const int n = (isFirstArrowBox) ? box.size() - arrowPos - 1 : arrowPos;
-		const unsigned int& leftI  = (isFirstArrowBox) ? arrowBegin : m_targetI;
-		const unsigned int& leftJ  = (isFirstArrowBox) ? arrowEnd   : m_targetJ;
-		const float permutationAnimStart = (isFirstArrowBox) ? 0.0 : 1.0;
-		
-		SynchronousSubTaskCommand* cmd0 = SynchronousSubTaskCommand::create((n + 0.5)/3.0);
-		AnimateMoveArrowInArrowBoxCommand* anim0 = AnimateMoveArrowInArrowBoxCommand::create(box, false);
-		cmd0->addCommand(anim0);
-		
-		if (isFirstArrowBox)
-			box.moveArrowToEnd(arrowRen, arrowPos, box, anim0);
-		else
-			box.moveArrowToBegin(arrowRen, arrowPos, box, anim0);
-		
-		SynchronousSubTaskCommand* cmd1 = SynchronousSubTaskCommand::create(permutation.lenght()/ArrowBox::Renderer::arrowSeparation() - 1.0);
-		AnimateMoveArrowPermutationBox* anim1 = AnimateMoveArrowPermutationBox::create(permutation, *arrowRen, leftI, leftJ, permutationAnimStart, 1.0-permutationAnimStart);
-		UpdateArrowBoxLenghtCommand* animLen0 = UpdateArrowBoxLenghtCommand::create(box, false);
-		animLen0->setVariation(box.lenght(), box.lenght()-ArrowBox::Renderer::arrowSeparation());
-		UpdateArrowBoxLenghtCommand* animLen1 = UpdateArrowBoxLenghtCommand::create(otherBox, false);
-		animLen1->setVariation(otherBox.lenght(), otherBox.lenght()+ArrowBox::Renderer::arrowSeparation());
-		cmd1->addCommand(anim1); cmd1->addCommand(animLen0); cmd1->addCommand(animLen1);
-		
-		SynchronousSubTaskCommand* cmd2 = SynchronousSubTaskCommand::create(0.5/3.0);
-		AnimateMoveArrowInArrowBoxCommand* anim2 = AnimateMoveArrowInArrowBoxCommand::create(otherBox, false);
-		cmd2->addCommand(anim2);
-		arrowRen->setBeginEnd(m_targetI, m_targetJ);
-		
-		subCommandQueue.push(cmd0);
-		subCommandQueue.push(cmd1);
-		subCommandQueue.push(cmd2);
-		subCommandQueue.push(RefreshArrowBoxCommand::create(box, true));
-		subCommandQueue.push(RefreshArrowBoxCommand::create(otherBox, true));
-		
-		if (isFirstArrowBox)
-			otherBox.moveArrowFromBegin(arrowRen, 0, box, anim2);
-		else
-			otherBox.moveArrowFromEnd(arrowRen, 0, box, anim2);
-	}
+	virtual void run(RendererGL& rendererGL);
 	
-	virtual std::string name() const {return "MoveArrowToOtherArrowBox";}
+	virtual std::string name() const {return "MoveArrowToOtherArrowBoxCommand";}
 };
 
-class MoveArrowToOtherArrowBoxResolveCrossing : public Command<RendererGL&> {
+class MoveArrowToOtherArrowBoxResolveCrossingCommand : public Command<RendererGL&> {
 	OneHandle& m_oneHandle;
 	ArrowBox&  m_arrowBox;
 	ArrowInArrowBoxIndexed m_arrow;
 	ArrowBox::ArrowInArrowBox& m_newArrow;
 	unsigned int m_targetI, m_targetJ;
 	
-	MoveArrowToOtherArrowBoxResolveCrossing(OneHandle& oneHandle, ArrowBox& arrowBox, ArrowInArrowBoxIndexed arrow, ArrowBox::ArrowInArrowBox& newArrow,
+	MoveArrowToOtherArrowBoxResolveCrossingCommand(OneHandle& oneHandle, ArrowBox& arrowBox, ArrowInArrowBoxIndexed arrow, ArrowBox::ArrowInArrowBox& newArrow,
 			unsigned int targetI, unsigned int targetJ) :
 		m_oneHandle(oneHandle), m_arrowBox(arrowBox), m_arrow(arrow), m_newArrow(newArrow), m_targetI(targetI), m_targetJ(targetJ) {}
 	
 public:
 	static Command<RendererGL&>* create(OneHandle& oneHandle, ArrowBox& arrowBox, ArrowInArrowBoxIndexed arrow, ArrowBox::ArrowInArrowBox& newArrow,
 			unsigned int targetI, unsigned int targetJ) {
-		return new MoveArrowToOtherArrowBoxResolveCrossing(oneHandle, arrowBox, arrow, newArrow, targetI, targetJ);
+		return new MoveArrowToOtherArrowBoxResolveCrossingCommand(oneHandle, arrowBox, arrow, newArrow, targetI, targetJ);
 	}
 	
-	virtual void run(RendererGL& rendererGL) {		
-		OneHandleRenderer&  oneHandle = m_oneHandle.getRenderer();
-		ArrowBox::Renderer& box = m_arrowBox.getRenderer();
-		
-		const bool isFirstArrowBox = (&box == &(oneHandle.getFirstArrowBox()));
-		assert((&box == &(oneHandle.getSecondArrowBox())) || isFirstArrowBox);
-		
-		ArrowBox::Renderer& otherBox = (isFirstArrowBox) ? oneHandle.getSecondArrowBox() : oneHandle.getFirstArrowBox();
-		ArrowBox::ArrowRendererInList arrowRen = m_arrow.first.get().getArrowRendererInList();
-		PermutationBox::Renderer& permutation = oneHandle.getPermutation();
-		const unsigned int arrowBegin = arrowRen->begin();
-		const unsigned int arrowEnd   = arrowRen->end();
-		const int& arrowPos = m_arrow.second;
-		
-		const int n = (isFirstArrowBox) ? box.size() - arrowPos - 1 : arrowPos;
-		const unsigned int& leftI  = (isFirstArrowBox) ? arrowBegin : m_targetI;
-		const unsigned int& leftJ  = (isFirstArrowBox) ? arrowEnd   : m_targetJ;
-		const unsigned int& rightI = (isFirstArrowBox) ? m_targetI  : arrowBegin;
-		const unsigned int& rightJ = (isFirstArrowBox) ? m_targetJ  : arrowEnd;
-		const float permutationAnimStart = (isFirstArrowBox) ? 0.0 : 1.0;
-		
-		SynchronousSubTaskCommand* cmd0 = SynchronousSubTaskCommand::create((n + 0.5)/3.0);
-		AnimateMoveArrowInArrowBoxCommand* anim0 = AnimateMoveArrowInArrowBoxCommand::create(box, false);
-		cmd0->addCommand(anim0);
-		
-		ShowableCurve& trackI(permutation.getTrack(leftI).getCurve());
-		ShowableCurve& trackJ(permutation.getTrack(leftJ).getCurve());
-		const float t = static_cast<Bezier&>(trackI.getCurve()).getIntersectionXCoordMatch(static_cast<Bezier&>(trackJ.getCurve()));
-		SynchronousSubTaskCommand* cmd1 = SynchronousSubTaskCommand::create(t*permutation.lenght()/ArrowBox::Renderer::arrowSeparation());
-		AnimateMoveArrowPermutationBox* anim1 = AnimateMoveArrowPermutationBox::create(permutation, *arrowRen, leftI, leftJ, permutationAnimStart, t);
-		cmd1->addCommand(anim1);
-		
-		Bezier bezier00a(static_cast<Bezier&>(trackI.getCurve()));
-		Bezier bezier10a(static_cast<Bezier&>(trackJ.getCurve()));
-		Bezier bezier01a(bezier00a.splitCurve(t, true));
-		Bezier bezier11a(bezier10a.splitCurve(t, true));
-		
-		Bezier bezier00b(permutation.getBezier(leftI, rightI));
-		Bezier bezier10b(permutation.getBezier(leftJ, rightJ));
-		Bezier bezier01b(bezier00b.splitCurve(t, true));
-		Bezier bezier11b(bezier10b.splitCurve(t, true));
-		
-		TrackBezier* trackI0 = new TrackBezier(rendererGL, 1e+10, 1e+10, 1e+10, 1e+10, trackColor.r, trackColor.g, trackColor.b, permutation.getLayer(), EAST, WEST);
-		TrackBezier* trackJ0 = new TrackBezier(rendererGL, 1e+10, 1e+10, 1e+10, 1e+10, trackColor.r, trackColor.g, trackColor.b, permutation.getLayer(), EAST, WEST);
-		
-		SynchronousSubTaskCommand* cmd2 = SynchronousSubTaskCommand::create(2.0/3.0);
-		AnimateInterpolateShowableBezierCurve* animCurve = AnimateInterpolateShowableBezierCurve::create();
-		animCurve->addCurve(static_cast<ShowableBezier&>(trackI),  bezier00a, bezier00b);
-		animCurve->addCurve(static_cast<ShowableBezier&>(trackI0->getCurve()), bezier01a, bezier11b);
-		animCurve->addCurve(static_cast<ShowableBezier&>(trackJ),  bezier10a, bezier10b);
-		animCurve->addCurve(static_cast<ShowableBezier&>(trackJ0->getCurve()), bezier11a, bezier01b);
-		
-		std::pair<ArrowBox::ArrowRendererInList, int> p;
-		if (isFirstArrowBox) {
-			box.moveArrowToEnd(arrowRen, arrowPos, box, anim0);
-			p = box.pushBackArrow(rendererGL, m_newArrow, arrowEnd, arrowBegin, false);
-		} else {
-			box.moveArrowToBegin(arrowRen, arrowPos, box, anim0);
-			p = box.pushFrontArrow(rendererGL, m_newArrow, arrowEnd, arrowBegin, false);
-		}
-		ArrowBox::ArrowRendererInList& newArrowRen = p.first;
-		
-		AnimateMoveArrowPermutationBox* animPer0 = AnimateMoveArrowPermutationBox::create(permutation, *arrowRen, leftI, leftJ, 1.0, 1.0);
-		AnimateMoveArrowPermutationBox* animPer1 = AnimateMoveArrowPermutationBox::create(permutation, *newArrowRen, leftJ, leftI, 1.0, 1.0);
-		cmd2->addCommand(animCurve); cmd2->addCommand(animPer0); cmd2->addCommand(animPer1);
-		permutation.permute(std::make_pair(rightJ, rightI), nullptr, true);
-		
-		RemoveTrackCommand* cmd3 = RemoveTrackCommand::create();
-		cmd3->addCurve(*trackI0); cmd3->addCurve(*trackJ0);
-		
-		float f = std::max(t, 1.0f-t);
-		SynchronousSubTaskCommand* cmd4 = SynchronousSubTaskCommand::create(f*permutation.lenght()/ArrowBox::Renderer::arrowSeparation());
-		AnimateMoveArrowPermutationBox* anim2 = AnimateMoveArrowPermutationBox::create(permutation, *arrowRen, leftI, leftJ, t, 1.0-permutationAnimStart);
-		AnimateMoveArrowPermutationBox* anim3 = AnimateMoveArrowPermutationBox::create(permutation, *newArrowRen, leftJ, leftI, t, permutationAnimStart);
-		cmd4->addCommand(anim2); cmd4->addCommand(anim3);
-		
-		SynchronousSubTaskCommand* cmd5 = SynchronousSubTaskCommand::create(1.0/3.0);
-		AnimateMoveArrowInArrowBoxCommand* anim4 = AnimateMoveArrowInArrowBoxCommand::create(otherBox, false);
-		AnimateMoveArrowInArrowBoxCommand* anim5 = AnimateMoveArrowInArrowBoxCommand::create(box, false);
-		UpdateArrowBoxLenghtCommand* animLen1 = UpdateArrowBoxLenghtCommand::create(otherBox);
-		animLen1->setVariation(otherBox.lenght(), otherBox.lenght()+ArrowBox::Renderer::arrowSeparation());
-		cmd5->addCommand(animLen1); cmd5->addCommand(anim4); cmd5->addCommand(anim5);
-		arrowRen->setBeginEnd(m_targetI, m_targetJ);
-		
-		if (isFirstArrowBox) {
-			otherBox.moveArrowFromBeginWithOthers(arrowRen, 0, box, anim4);
-			box.moveArrowFromEnd(newArrowRen, 0, box, anim5);
-		} else {
-			otherBox.moveArrowFromEnd(arrowRen, 0, box, anim4);
-			box.moveArrowFromBeginWithOthers(newArrowRen, 0, box, anim5);
-		}
-		
-		subCommandQueue.push(cmd0);
-		subCommandQueue.push(cmd1);
-		subCommandQueue.push(cmd2);
-		subCommandQueue.push(cmd3);
-		subCommandQueue.push(RefreshPermutationBoxCommand::create(permutation));
-		subCommandQueue.push(cmd4);
-		subCommandQueue.push(cmd5);
-		subCommandQueue.push(RefreshArrowBoxCommand::create(box, true));
-		subCommandQueue.push(RefreshArrowBoxCommand::create(otherBox, true));
-	}
+	virtual void run(RendererGL& rendererGL);
 	
-	virtual std::string name() const {return "MoveArrowToOtherArrowBoxResolveCrossing";}
+	virtual std::string name() const {return "MoveArrowToOtherArrowBoxResolveCrossingCommand";}
 };
 
-void PassArrowsThroughtZeroHandle::run(RendererGL& rendererGL) {
-	AsynchronousSubTaskCommand* cmd = AsynchronousSubTaskCommand::create();
-	
-	ArrowBox::Renderer& arrowBox = m_arrowBox.getRenderer();
-	OneHandleRenderer& oneHandle = arrowBox.getOneHandle();
-	ZeroHandleRenderer& zeroHandle = oneHandle.getZeroHandle();
-	const bool isFirstArrowBox = (&arrowBox == &(oneHandle.getFirstArrowBox()));
-	assert((&arrowBox == &(oneHandle.getSecondArrowBox())) || isFirstArrowBox);
-	
-	size_t size = arrowBox.size();
-	size_t firstVoidArrowBoxNum = 0;
-	size_t secondVoidArrowBoxNum = 0;
-	size_t firstFullArrowBoxNum = 0;
-	size_t secondFullArrowBoxNum = 0;
-	for (size_t i=0; i<m_moveData.size(); ++i) {
-		int edge = zeroHandle.getEdgeFromArrowBox(m_moveData[i].m_targetArrowBox.getRenderer());
-		if (edge==0)
-			++firstFullArrowBoxNum;
-		else if (edge==1)
-			++secondVoidArrowBoxNum;
-		else if (edge==2)
-			++secondFullArrowBoxNum;
-		else
-			++firstVoidArrowBoxNum;
-	}
-	
-	if (&arrowBox!=&(zeroHandle.getVoidHandle().getFirstArrowBox()) && firstVoidArrowBoxNum>0) {
-		ArrowBox::Renderer& updateBox = zeroHandle.getVoidHandle().getFirstArrowBox();
-		UpdateArrowBoxLenghtCommand* lenAnim = UpdateArrowBoxLenghtCommand::create(updateBox, true);
-		AnimateMoveArrowInArrowBoxCommand* anim = AnimateMoveArrowInArrowBoxCommand::create(updateBox, false);
-		updateBox.moveArrowsFake(0, firstVoidArrowBoxNum, anim);
-		lenAnim->setVariation(updateBox.lenght(), updateBox.lenght()+firstVoidArrowBoxNum*ArrowBox::Renderer::arrowSeparation());
-		cmd->addCommand(lenAnim, 0.0, 1.0*firstVoidArrowBoxNum);
-		cmd->addCommand(anim, 1e-5, 1.0*firstVoidArrowBoxNum);
-	}
-	
-	if (&arrowBox!=&(zeroHandle.getVoidHandle().getSecondArrowBox()) && secondVoidArrowBoxNum>0) {
-		ArrowBox::Renderer& updateBox = zeroHandle.getVoidHandle().getSecondArrowBox();
-		UpdateArrowBoxLenghtCommand* lenAnim = UpdateArrowBoxLenghtCommand::create(updateBox, true);
-		lenAnim->setVariation(updateBox.lenght(), updateBox.lenght()+secondVoidArrowBoxNum*ArrowBox::Renderer::arrowSeparation());
-		cmd->addCommand(lenAnim, 0.0, 1.0*secondVoidArrowBoxNum);
-	}
-	
-	if (&arrowBox!=&(zeroHandle.getFullHandle().getFirstArrowBox()) && firstFullArrowBoxNum>0) {
-		ArrowBox::Renderer& updateBox = zeroHandle.getFullHandle().getFirstArrowBox();
-		UpdateArrowBoxLenghtCommand* lenAnim = UpdateArrowBoxLenghtCommand::create(updateBox, true);
-		AnimateMoveArrowInArrowBoxCommand* anim = AnimateMoveArrowInArrowBoxCommand::create(updateBox, false);
-		updateBox.moveArrowsFake(0, firstFullArrowBoxNum, anim);
-		lenAnim->setVariation(updateBox.lenght(), updateBox.lenght()+firstFullArrowBoxNum*ArrowBox::Renderer::arrowSeparation());
-		cmd->addCommand(lenAnim, 0.0, 1.0*firstFullArrowBoxNum);
-		cmd->addCommand(anim, 1e-5, 1.0*firstFullArrowBoxNum);
-	}
-	
-	if (&arrowBox!=&(zeroHandle.getFullHandle().getSecondArrowBox()) && secondFullArrowBoxNum>0) {
-		ArrowBox::Renderer& updateBox = zeroHandle.getFullHandle().getSecondArrowBox();
-		UpdateArrowBoxLenghtCommand* lenAnim = UpdateArrowBoxLenghtCommand::create(updateBox, true);
-		lenAnim->setVariation(updateBox.lenght(), updateBox.lenght()+secondFullArrowBoxNum*ArrowBox::Renderer::arrowSeparation());
-		cmd->addCommand(lenAnim, 0.0, 1.0*secondFullArrowBoxNum);
-	}
-	
-	UpdateArrowBoxLenghtCommand* lenAnim = UpdateArrowBoxLenghtCommand::create(arrowBox, true);
-	lenAnim->setVariation(arrowBox.lenght(), arrowBox.lenght()-ArrowBox::Renderer::arrowSeparation()*m_moveData.size());
-	cmd->addCommand(lenAnim, 0.0, 1.0*m_moveData.size());
-	
-	if (isFirstArrowBox) {
-		for (size_t i=0; i<m_moveData.size(); ++i) {
-			MoveData& moveData = m_moveData[i];
-			ArrowBox::ArrowRendererInList it = moveData.m_arrow.first.get().getArrowRendererInList();
-			
-			ArrowBox::Renderer& targetArrowBox = moveData.m_targetArrowBox.getRenderer();
-			OneHandleRenderer& targetOneHandle = targetArrowBox.getOneHandle();
-			const bool targetIsFirstArrowBox = (&targetArrowBox == &(targetOneHandle.getFirstArrowBox()));
-			assert((&targetArrowBox == &(targetOneHandle.getSecondArrowBox())) || targetIsFirstArrowBox);
-			
-			AnimateMoveArrowInArrowBoxCommand* anim0 = AnimateMoveArrowInArrowBoxCommand::create(arrowBox, false);
-			arrowBox.moveArrowToBeginFake(it, moveData.m_arrow.second, arrowBox, anim0);
-			AnimateMoveArrowPermutationBox* anim1 = AnimateMoveArrowPermutationBox::create(oneHandle.getPrePermutation(), *it,
-					moveData.m_beginI, moveData.m_beginJ, 1.0, 0.0);
-			
-			it->setBeginEnd(moveData.m_targetI, moveData.m_targetJ);
-			
-			int arrowBoxEdge = zeroHandle.getEdgeFromArrowBox(arrowBox);
-			int targetArrowBoxEdge = zeroHandle.getEdgeFromArrowBox(targetArrowBox);
-			unsigned int beginI = zeroHandle.getIndexFromTrack(moveData.m_beginI, arrowBoxEdge);
-			unsigned int beginJ = zeroHandle.getIndexFromTrack(moveData.m_beginJ, arrowBoxEdge);
-			unsigned int endI   = zeroHandle.getIndexFromTrack(moveData.m_endI,   targetArrowBoxEdge);
-			unsigned int endJ   = zeroHandle.getIndexFromTrack(moveData.m_endJ,   targetArrowBoxEdge);
-			int layer = (targetArrowBoxEdge==0 || targetArrowBoxEdge==2) ? 2 : 0;
-			Command<RendererGL&, float>* layerChangeCmd = ArrowSetLayerCommand::create(*it, layer);
-			Command<RendererGL&, float>* anim2 = MoveArrowThroughtZeroHandleCommand::create(*it, zeroHandle, beginI, endI, beginJ, endJ, 0.0, 1.0);
-			
-			
-			AnimateMoveArrowPermutationBox* anim3;
-			AnimateMoveArrowInArrowBoxCommand* anim4;
-			float targetPerLenght;
-			if (targetIsFirstArrowBox) {
-				targetPerLenght = targetOneHandle.getPrePermutation().lenght();
-				anim3 = AnimateMoveArrowPermutationBox::create(targetOneHandle.getPrePermutation(), *it, moveData.m_endI, moveData.m_endJ, 0.0, 1.0);
-				anim4 = AnimateMoveArrowInArrowBoxCommand::create(targetArrowBox, false);
-				
-				if (&targetOneHandle==&(zeroHandle.getVoidHandle())) {
-					targetArrowBox.moveArrowFromBeginFake(it, --firstVoidArrowBoxNum, arrowBox, anim4);
-				} else {
-					assert(&targetOneHandle==&(zeroHandle.getFullHandle()));
-					targetArrowBox.moveArrowFromBeginFake(it, --firstFullArrowBoxNum, arrowBox, anim4);
-				}
-			} else {
-				targetPerLenght = targetOneHandle.getPostPermutation().lenght();
-				anim3 = AnimateMoveArrowPermutationBox::create(targetOneHandle.getPostPermutation(), *it, moveData.m_targetI, moveData.m_targetJ, 1.0, 0.0);
-				anim4 = AnimateMoveArrowInArrowBoxCommand::create(targetArrowBox, false);
-				
-				if (&targetOneHandle==&(zeroHandle.getVoidHandle())) {
-					targetArrowBox.moveArrowFromEndFake(it, --secondVoidArrowBoxNum, arrowBox, anim4);
-				} else {
-					assert(&targetOneHandle==&(zeroHandle.getFullHandle()));
-					targetArrowBox.moveArrowFromEndFake(it, --secondFullArrowBoxNum, arrowBox, anim4);
-				}
-			}
-			
-			float t0 = moveData.m_arrow.second+0.5;
-			float t1 = t0 + oneHandle.getPrePermutation().lenght()/ArrowBox::Renderer::arrowSeparation();
-			float t2 = t1 + zeroHandle.getPathLenght(beginI, endI, beginJ, endJ)/ArrowBox::Renderer::arrowSeparation();
-			float t3 = t2 + targetPerLenght/ArrowBox::Renderer::arrowSeparation();
-			cmd->addCommand(anim0, 1e-5, t0); // Doit etre apres la modification de la taille des anses
-			cmd->addCommand(anim1, t0, t1);
-			cmd->addCommand(anim2, t1, t2);
-			cmd->addCommand(layerChangeCmd, (t1+t2)/2, (t1+t2)/2);
-			cmd->addCommand(anim3, t2, t3);
-			cmd->addCommand(anim4, t3, t3+0.5);
-		}
-	} else {
-		for (size_t i=0; i<m_moveData.size(); ++i) {
-			MoveData& moveData = m_moveData[i];
-			ArrowBox::ArrowRendererInList it = moveData.m_arrow.first.get().getArrowRendererInList();
-			ArrowBox::Renderer& targetArrowBox = moveData.m_targetArrowBox.getRenderer();
-			assert(&targetArrowBox!=&arrowBox);
-			
-			AnimateMoveArrowInArrowBoxCommand* anim0 = AnimateMoveArrowInArrowBoxCommand::create(arrowBox, false);
-			arrowBox.moveArrowToEndFake(it, moveData.m_arrow.second, arrowBox, anim0);
-			AnimateMoveArrowPermutationBox* anim1 = AnimateMoveArrowPermutationBox::create(oneHandle.getPostPermutation(), *it,
-					it->begin(), it->end(), 0.0, 1.0);
-			
-			it->setBeginEnd(moveData.m_targetI, moveData.m_targetJ);
-			
-			int arrowBoxEdge = zeroHandle.getEdgeFromArrowBox(arrowBox);
-			int targetArrowBoxEdge = zeroHandle.getEdgeFromArrowBox(targetArrowBox);
-			unsigned int beginI = zeroHandle.getIndexFromTrack(moveData.m_beginI, arrowBoxEdge);
-			unsigned int beginJ = zeroHandle.getIndexFromTrack(moveData.m_beginJ, arrowBoxEdge);
-			unsigned int endI   = zeroHandle.getIndexFromTrack(moveData.m_endI,   targetArrowBoxEdge);
-			unsigned int endJ   = zeroHandle.getIndexFromTrack(moveData.m_endJ,   targetArrowBoxEdge);
-			int layer = (targetArrowBoxEdge==0 || targetArrowBoxEdge==2) ? 2 : 0;
-			Command<RendererGL&, float>* layerChangeCmd = ArrowSetLayerCommand::create(*it, layer);
-			Command<RendererGL&, float>* anim2 = MoveArrowThroughtZeroHandleCommand::create(*it, zeroHandle, beginI, endI, beginJ, endJ, 0.0, 1.0);
-			
-			OneHandleRenderer& targetOneHandle = targetArrowBox.getOneHandle();
-			const bool targetIsFirstArrowBox = (&targetArrowBox == &(targetOneHandle.getFirstArrowBox()));
-			assert((&targetArrowBox == &(targetOneHandle.getSecondArrowBox())) || targetIsFirstArrowBox);
-			
-			float targetPerLenght;
-			AnimateMoveArrowPermutationBox* anim3;
-			AnimateMoveArrowInArrowBoxCommand* anim4;
-			if (targetIsFirstArrowBox) {
-				targetPerLenght = targetOneHandle.getPrePermutation().lenght();
-				anim3 = AnimateMoveArrowPermutationBox::create(targetOneHandle.getPrePermutation(), *it, moveData.m_endI, moveData.m_endJ, 0.0, 1.0);
-				anim4 = AnimateMoveArrowInArrowBoxCommand::create(targetArrowBox, false);
-				
-				if (&targetOneHandle==&(zeroHandle.getVoidHandle())) {
-					targetArrowBox.moveArrowFromBeginFake(it, --firstVoidArrowBoxNum, arrowBox, anim4);
-				} else {
-					assert(&targetOneHandle==&(zeroHandle.getFullHandle()));
-					targetArrowBox.moveArrowFromBeginFake(it, --firstFullArrowBoxNum, arrowBox, anim4);
-				}
-			} else {
-				targetPerLenght = targetOneHandle.getPostPermutation().lenght();
-				anim3 = AnimateMoveArrowPermutationBox::create(targetOneHandle.getPostPermutation(), *it, moveData.m_targetI, moveData.m_targetJ, 1.0, 0.0);
-				anim4 = AnimateMoveArrowInArrowBoxCommand::create(targetArrowBox, false);
-				
-				if (&targetOneHandle==&(zeroHandle.getVoidHandle())) {
-					targetArrowBox.moveArrowFromEndFake(it, --secondVoidArrowBoxNum, arrowBox, anim4);
-				} else {
-					assert(&targetOneHandle==&(zeroHandle.getFullHandle()));
-					targetArrowBox.moveArrowFromEndFake(it, --secondFullArrowBoxNum, arrowBox, anim4);
-				}
-			}
-			
-			float t0 = size-moveData.m_arrow.second-0.5;
-			float t1 = t0 + oneHandle.getPrePermutation().lenght()/ArrowBox::Renderer::arrowSeparation();
-			float t2 = t1 + zeroHandle.getPathLenght(beginI, endI, beginJ, endJ)/ArrowBox::Renderer::arrowSeparation();
-			float t3 = t2 + targetPerLenght/ArrowBox::Renderer::arrowSeparation();
-			cmd->addCommand(anim0, 1e-5, t0); // Doit etre apres la modification de la taille des anses
-			cmd->addCommand(anim1, t0, t1);
-			cmd->addCommand(anim2, t1, t2);
-			cmd->addCommand(layerChangeCmd, (t1+t2)/2, (t1+t2)/2);
-			cmd->addCommand(anim3, t2, t3);
-			cmd->addCommand(anim4, t3, t3+0.5);
-		}
-	}
-	
-	subCommandQueue.push(cmd);
-	subCommandQueue.push(RefreshArrowBoxCommand::create(zeroHandle.getFullHandle().getFirstArrowBox(),  true));
-	subCommandQueue.push(RefreshArrowBoxCommand::create(zeroHandle.getVoidHandle().getSecondArrowBox(), true));
-	subCommandQueue.push(RefreshArrowBoxCommand::create(zeroHandle.getFullHandle().getSecondArrowBox(), true));
-	subCommandQueue.push(RefreshArrowBoxCommand::create(zeroHandle.getFullHandle().getFirstArrowBox(),  true));
-}
+
+
+
+
+
 
 void MoveArrowsAcrossZeroHandle::moveArrowThroughtOneHandle(AsynchronousSubTaskCommand* cmd, float start, float end, unsigned int rightI, unsigned int rightJ,
 		Arrow::Renderer& arrow, OneHandleRenderer& oneHandle, float& time) {
@@ -1454,12 +896,12 @@ void MoveArrowsAcrossZeroHandle::run(RendererGL& rendererGL) {
 }
 
 class PushArrowCommand : public Command<RendererGL&> {
-	ArrowBox& arwBox;
-	ArrowBox::ArrowInArrowBox& newArw;
-	unsigned int begin, end;
+	ArrowBox& m_arrowBox;
+	ArrowBox::ArrowInArrowBox& m_newArrow;
+	unsigned int m_from, m_to;
 	
 	PushArrowCommand(ArrowBox& arrowBox, ArrowBox::ArrowInArrowBox& newArrow, unsigned int from, unsigned int to) :
-		arwBox(arrowBox), newArw(newArrow), begin(from), end(to) {}
+		m_arrowBox(arrowBox), m_newArrow(newArrow), m_from(from), m_to(to) {}
 	
 public:
 	static Command<RendererGL&>* create(ArrowBox& arrowBox, ArrowBox::ArrowInArrowBox& newArrow, unsigned int from, unsigned int to) {
@@ -1467,11 +909,624 @@ public:
 	}
 	
 	virtual void run(RendererGL& rendererGL) {
-		arwBox.getRenderer().pushBackArrow(rendererGL, newArw, begin, end);
+		m_arrowBox.getRenderer().pushBackArrow(rendererGL, m_newArrow, m_from, m_to);
 	}
 	
 	virtual std::string name() const {return "PushArrowCommand";}
 };
+
+
+
+
+
+
+
+
+
+void SynchronousSubTaskCommand::run(RendererGL& rendererGL, float dt, float& pastTime) {
+	m_t+=dt;
+	pastTime = m_t-m_duration;
+	
+	if (pastTime < 0.0){
+		float p = m_t/m_duration;
+		for (auto it=m_tasks.begin(); it!=m_tasks.end(); it++)
+			it->m_cmd->run(rendererGL, p);
+	}
+}
+
+void RefreshArrowBoxCommand::run(RendererGL& rendererGL, float dt, float& pastTime) {
+	m_arrowBox.refreshArrows();
+	if (m_refreshLenght) m_arrowBox.refreshLenght();
+	if (m_refreshTracks) m_arrowBox.refreshTracks();
+	pastTime = 0.0;
+}
+
+void RefreshPermutationBoxCommand::run(RendererGL& rendererGL, float dt, float& pastTime) {
+	m_permutationBox.refresh();
+	pastTime = 0.0;
+}
+
+void RemoveArrowCommand::run(RendererGL& rendererGL, float dt, float& pastTime) {
+	m_arrowBox.removeArrow(m_arrow);
+	pastTime = 0.0;
+}
+
+void RemoveCrossingCommand::run(RendererGL& rendererGL, float dt, float& pastTime) {
+	m_arrowBox.deleteCrossing();
+	pastTime = 0.0;
+}
+
+void RemoveTrackCommand::run(RendererGL& rendererGL, float dt, float& pastTime) {
+	for (size_t i=0; i<m_curves.size(); i++)
+		delete m_curves[i];
+	
+	m_curves.clear();
+	pastTime=0.0;
+}
+
+std::pair<int, bool> pushMoveSubcommand(ArrowBox& arrowBox, ArrowInArrowBoxIndexed movingArrow, ArrowInArrowBoxIndexed targetArrow) {
+	int n = targetArrow.second - movingArrow.second;
+	
+	bool forward = false;
+	if (n>0) {
+		n--; forward = true;
+	} else n++;
+	if (n != 0) {
+		SynchronousSubTaskCommand* cmd = SynchronousSubTaskCommand::create(std::abs(n)/3.0);
+		AnimateMoveArrowInArrowBoxCommand* anim = AnimateMoveArrowInArrowBoxCommand::create(arrowBox.getRenderer(), false);
+		cmd->addCommand(anim);
+		arrowBox.getRenderer().moveArrow(movingArrow.first.get().getArrowRendererInList(), movingArrow.second, n, anim);
+		subCommandQueue.push(cmd);
+	}
+	
+	return std::make_pair(n, forward);
+}
+
+void DeleteZeroHandleCommand::run(RendererGL& rendererGL) {
+	ZeroHandleRenderer& zeroHandle = m_zeroHandle.getRenderer();
+	assert(&m_zeroHandle.getRenderer() == zeroHandleCurrent);
+	delete &zeroHandle;
+	delete &m_zeroHandle;
+	zeroHandleCurrent = nullptr;
+}
+
+void DrawZeroHandleCommand::run(RendererGL& rendererGL) {
+	assert(zeroHandleCurrent == nullptr);
+	zeroHandleCurrent = new ZeroHandleRenderer(rendererGL, m_pairing, m_zeroHandle, m_voidArrowsData, m_voidArrows, m_fullArrowsData, m_fullArrows);
+}
+
+void PermuteArrowBoxCommand::run(RendererGL& rendererGL) {
+	OneHandleRenderer& oneHandle = m_oneHandle.getRenderer();
+	ArrowBox::Renderer& arrowBox = (m_isFirstArrowBox) ? oneHandle.getFirstArrowBox() : oneHandle.getSecondArrowBox();
+	PermutationBox::Renderer& permutation = oneHandle.getPermutation();
+	PermutationBox::Renderer& sidePermutation = (m_isFirstArrowBox) ? oneHandle.getPrePermutation() : oneHandle.getPostPermutation();
+	
+	SynchronousSubTaskCommand* cmd = SynchronousSubTaskCommand::create(10.0/3.0);
+	AnimateMoveTrackLineArrowBox*      animArrowTrack     = AnimateMoveTrackLineArrowBox::create(arrowBox);
+	AnimateMoveArrowInArrowBoxCommand* animArrows         = AnimateMoveArrowInArrowBoxCommand::create(arrowBox, true);
+	AnimateMoveTrackPermutationBox*    animPrePermutation = AnimateMoveTrackPermutationBox::create(sidePermutation);
+	AnimateMoveTrackPermutationBox*    animPermutation    = AnimateMoveTrackPermutationBox::create(permutation);
+	cmd->addCommand(animArrowTrack); cmd->addCommand(animArrows); cmd->addCommand(animPrePermutation); cmd->addCommand(animPermutation);
+	
+	arrowBox.permuteTracks(m_permutation.getPermutation(), animArrowTrack, animArrows);
+	if (!m_isFirstArrowBox) m_permutation.inverse();
+	sidePermutation.permute(m_permutation, animPrePermutation, m_isFirstArrowBox);
+	m_permutation.inverse();
+	permutation.permute(m_permutation, animPermutation, !m_isFirstArrowBox);
+	if (m_isFirstArrowBox) m_permutation.inverse();
+	
+	subCommandQueue.push(cmd);
+	subCommandQueue.push(RefreshPermutationBoxCommand::create(sidePermutation));
+	subCommandQueue.push(RefreshArrowBoxCommand::create(arrowBox, false, true));
+	subCommandQueue.push(RefreshPermutationBoxCommand::create(permutation));
+}
+
+void MoveArrowInArrowBoxCommand::run(RendererGL& rendererGL) {
+	ArrowBox::Renderer& arrowBox = m_arrowBox.getRenderer();
+	int n = m_targetArrow.second - m_movingArrow.second;
+	
+	SynchronousSubTaskCommand* cmd = SynchronousSubTaskCommand::create(std::abs(n)/3.0);
+	AnimateMoveArrowInArrowBoxCommand* anim = AnimateMoveArrowInArrowBoxCommand::create(arrowBox, false);
+	cmd->addCommand(anim);
+	
+	arrowBox.moveArrow(m_movingArrow.first.get().getArrowRendererInList(), m_movingArrow.second, n, anim);
+	subCommandQueue.push(cmd);
+	subCommandQueue.push(RefreshArrowBoxCommand::create(arrowBox, false));
+}
+
+void GenArrowAfterMoveCrossingCommand::run(RendererGL& rendererGL) {
+	ArrowBox::Renderer& arrowBox = m_arrowBox.getRenderer();
+	
+	std::pair<int, bool> moveData = pushMoveSubcommand(m_arrowBox, m_movingArrow, m_targetArrow);
+	bool& forward(moveData.second);
+	
+	SynchronousSubTaskCommand*         cmd0     = SynchronousSubTaskCommand::create(0.5/3.0);
+	AnimateMoveArrowInArrowBoxCommand* anim0    = AnimateMoveArrowInArrowBoxCommand::create(arrowBox, false);
+	cmd0->addCommand(anim0);
+	
+	SynchronousSubTaskCommand*         cmd1     = SynchronousSubTaskCommand::create(1.5/3.0);
+	AnimateMoveArrowInArrowBoxCommand* anim1    = AnimateMoveArrowInArrowBoxCommand::create(arrowBox, false);
+	UpdateArrowBoxLenghtCommand*       lenAnim1 = UpdateArrowBoxLenghtCommand::create(arrowBox);
+	cmd1->addCommand(lenAnim1); cmd1->addCommand(anim1);
+	
+	if (forward)
+		arrowBox.spawnArrowAfterCrossingForward (rendererGL, m_targetArrow.first.get().getArrowRendererInList(), m_newArrow, m_targetArrow.second,
+				m_from, m_to, anim0, anim1, lenAnim1, m_genAfter);
+	else
+		arrowBox.spawnArrowAfterCrossingBackward(rendererGL, m_targetArrow.first.get().getArrowRendererInList(), m_newArrow, m_targetArrow.second,
+				m_from, m_to, anim0, anim1, lenAnim1, m_genAfter);
+	
+	subCommandQueue.push(cmd0);
+	subCommandQueue.push(cmd1);
+	subCommandQueue.push(RefreshArrowBoxCommand::create(arrowBox, true));
+}
+
+void MoveMergeArrowsCommand::run(RendererGL& rendererGL) {
+	ArrowBox::Renderer& arrowBox = m_arrowBox.getRenderer();
+	std::pair<int, bool> moveData = pushMoveSubcommand(m_arrowBox, m_movingArrow, m_targetArrow);
+	bool& forward(moveData.second);
+	
+	SynchronousSubTaskCommand*         cmd0     = SynchronousSubTaskCommand::create(0.5/3.0);
+	AnimateMoveArrowInArrowBoxCommand* anim0    = AnimateMoveArrowInArrowBoxCommand::create(arrowBox, false);
+	UpdateArrowBoxLenghtCommand*       lenAnim0 = UpdateArrowBoxLenghtCommand::create(arrowBox);
+	cmd0->addCommand(lenAnim0); cmd0->addCommand(anim0);
+	
+	SynchronousSubTaskCommand*         cmd1     = SynchronousSubTaskCommand::create(1.5/3.0);
+	AnimateMoveArrowInArrowBoxCommand* anim1    = AnimateMoveArrowInArrowBoxCommand::create(arrowBox, false);
+	UpdateArrowBoxLenghtCommand*       lenAnim1 = UpdateArrowBoxLenghtCommand::create(arrowBox);
+	cmd1->addCommand(lenAnim1); cmd1->addCommand(anim1);
+	
+	arrowBox.mergeArrows(rendererGL, m_targetArrow.first.get().getArrowRendererInList(), m_targetArrow.second, anim0, lenAnim0, anim1, lenAnim1, forward);
+	
+	subCommandQueue.push(cmd0);
+	subCommandQueue.push(RemoveArrowCommand::create(arrowBox, m_movingArrow.first));
+	subCommandQueue.push(RemoveArrowCommand::create(arrowBox, m_targetArrow.first));
+	subCommandQueue.push(cmd1);
+	subCommandQueue.push(RefreshArrowBoxCommand::create(arrowBox, true));
+}
+
+void RemoveArrowFromArrowBoxCommand::run(RendererGL& rendererGL) {
+	ArrowBox::Renderer& arrowBox = m_arrowBox.getRenderer();
+	ArrowBox::ArrowRendererInList arrowInList = m_arrow.first.get().getArrowRendererInList();
+	int& index = m_arrow.second;
+	
+	SynchronousSubTaskCommand* cmd0 = SynchronousSubTaskCommand::create(1.0/3.0);
+	AnimateMoveArrowInArrowBoxCommand* anim0    = AnimateMoveArrowInArrowBoxCommand::create(arrowBox, false);
+	UpdateArrowBoxLenghtCommand*       lenAnim0 = UpdateArrowBoxLenghtCommand::create(arrowBox);
+	cmd0->addCommand(lenAnim0); cmd0->addCommand(anim0);
+	
+	arrowBox.removeArrow(rendererGL, arrowInList, index, anim0, lenAnim0);
+	
+	subCommandQueue.push(RemoveArrowCommand::create(arrowBox, m_arrow.first));
+	subCommandQueue.push(cmd0);
+	subCommandQueue.push(RefreshArrowBoxCommand::create(arrowBox, true));
+}
+
+void MoveArrowGenCrossingCommand::run(RendererGL& rendererGL) {
+	ArrowBox::Renderer& arrowBox = m_arrowBox.getRenderer();
+	assert(&arrowBox == &(arrowBox.getOneHandle().getFirstArrowBox()));
+	
+	std::pair<int, bool> moveData = pushMoveSubcommand(m_arrowBox, m_movingArrow, m_targetArrow);
+#ifndef NDEBUG
+	bool& forward(moveData.second);
+	assert(forward);
+#endif
+	
+	SynchronousSubTaskCommand*         cmd0  = SynchronousSubTaskCommand::create(1.0/3.0);
+	AnimateMoveArrowInArrowBoxCommand* anim0 = AnimateMoveArrowInArrowBoxCommand::create(arrowBox, false);
+	cmd0->addCommand(anim0);
+	
+	SynchronousSubTaskCommand* cmd1 = SynchronousSubTaskCommand::create(1.0/3.0);
+	GenCrossingCommand*        anim1 = nullptr;
+	
+	std::vector<MoveCrossingCommand*> anims2;
+	FadeCrossingCommand* anim3 = nullptr;
+	arrowBox.genCrossing(rendererGL, m_targetArrow.first.get().getArrowRendererInList(), m_targetArrow.second,
+			anim0, anim1, anims2, anim3, m_crossingI, m_crossingJ);
+	cmd1->addCommand(anim1);
+	
+	subCommandQueue.push(cmd0);
+	subCommandQueue.push(RemoveArrowCommand::create(arrowBox, m_movingArrow.first));
+	subCommandQueue.push(cmd1);
+	
+	for (size_t i=0; i<anims2.size(); i++) {
+		SynchronousSubTaskCommand* cmd = SynchronousSubTaskCommand::create(1.0/3.0);
+		cmd->addCommand(anims2[i]);
+		subCommandQueue.push(cmd);
+	}
+	
+	SynchronousSubTaskCommand*      cmd3  = SynchronousSubTaskCommand::create(1.0/3.0);
+	UpdateArrowBoxLenghtCommand*    animLen3 = UpdateArrowBoxLenghtCommand::create(arrowBox);
+	animLen3->setVariation(arrowBox.lenght(), arrowBox.lenght()-ArrowBox::Renderer::arrowSeparation());
+	AnimateMoveTrackPermutationBox* animPer3 = AnimateMoveTrackPermutationBox::create(arrowBox.getOneHandle().getPermutation());
+	arrowBox.getOneHandle().getPermutation().permute(std::make_pair(m_crossingI, m_crossingJ), animPer3, false);
+	cmd3->addCommand(animLen3); cmd3->addCommand(animPer3); cmd3->addCommand(anim3);
+	subCommandQueue.push(cmd3);
+	subCommandQueue.push(RemoveCrossingCommand::create(arrowBox));
+	subCommandQueue.push(RefreshArrowBoxCommand::create(arrowBox, true));
+}
+
+void MoveArrowToFirstArrowBoxCommand::run(RendererGL& rendererGL) {
+	OneHandleRenderer& oneHandle = m_oneHandle.getRenderer();
+	ArrowBox::Renderer& firstBox = oneHandle.getFirstArrowBox();
+	ArrowBox::Renderer& secondBox = oneHandle.getSecondArrowBox();
+	
+	AsynchronousSubTaskCommand* cmd0 = AsynchronousSubTaskCommand::create();
+	float arrowBox0Lenght = firstBox.lenght();
+	float arrowBox1Lenght = secondBox.lenght();
+	float duration = arrowBox1Lenght/(3.0*ArrowBox::Renderer::arrowSeparation());
+	UpdateArrowBoxLenghtCommand* animLen0 = UpdateArrowBoxLenghtCommand::create(firstBox, false);
+	animLen0->setVariation(arrowBox0Lenght, arrowBox0Lenght+arrowBox1Lenght);
+	UpdateArrowBoxLenghtCommand* animLen1 = UpdateArrowBoxLenghtCommand::create(secondBox, false);
+	animLen1->setVariation(arrowBox1Lenght, 0.0);
+	cmd0->addCommand(animLen0, 0.0, duration); cmd0->addCommand(animLen1, 0.0, duration);
+	
+	oneHandle.transferArrowsToFirstArrowBox(cmd0, duration);
+	subCommandQueue.push(cmd0);
+	subCommandQueue.push(RefreshArrowBoxCommand::create(firstBox, true));
+	subCommandQueue.push(RefreshArrowBoxCommand::create(secondBox, true));
+}
+
+void MoveArrowToOtherArrowBoxCommand::run(RendererGL& rendererGL) {
+	OneHandleRenderer&  oneHandle = m_oneHandle.getRenderer();
+	ArrowBox::Renderer& box = m_arrowBox.getRenderer();
+	
+	const bool isFirstArrowBox = (&box == &(oneHandle.getFirstArrowBox()));
+	assert((&box == &(oneHandle.getSecondArrowBox())) || isFirstArrowBox);
+	
+	ArrowBox::Renderer& otherBox = (isFirstArrowBox) ? oneHandle.getSecondArrowBox() : oneHandle.getFirstArrowBox();
+	PermutationBox::Renderer& permutation = oneHandle.getPermutation();
+	ArrowBox::ArrowRendererInList arrowRen = m_arrow.first.get().getArrowRendererInList();
+	const unsigned int arrowBegin = arrowRen->begin();
+	const unsigned int arrowEnd   = arrowRen->end();
+	const int& arrowPos = m_arrow.second;
+	
+	const int n = (isFirstArrowBox) ? box.size() - arrowPos - 1 : arrowPos;
+	const unsigned int& leftI  = (isFirstArrowBox) ? arrowBegin : m_targetI;
+	const unsigned int& leftJ  = (isFirstArrowBox) ? arrowEnd   : m_targetJ;
+	const float permutationAnimStart = (isFirstArrowBox) ? 0.0 : 1.0;
+	
+	SynchronousSubTaskCommand* cmd0 = SynchronousSubTaskCommand::create((n + 0.5)/3.0);
+	AnimateMoveArrowInArrowBoxCommand* anim0 = AnimateMoveArrowInArrowBoxCommand::create(box, false);
+	cmd0->addCommand(anim0);
+	
+	if (isFirstArrowBox)
+		box.moveArrowToEnd(arrowRen, arrowPos, box, anim0);
+	else
+		box.moveArrowToBegin(arrowRen, arrowPos, box, anim0);
+	
+	SynchronousSubTaskCommand* cmd1 = SynchronousSubTaskCommand::create(permutation.lenght()/ArrowBox::Renderer::arrowSeparation() - 1.0);
+	AnimateMoveArrowPermutationBox* anim1 = AnimateMoveArrowPermutationBox::create(permutation, *arrowRen, leftI, leftJ, permutationAnimStart, 1.0-permutationAnimStart);
+	UpdateArrowBoxLenghtCommand* animLen0 = UpdateArrowBoxLenghtCommand::create(box, false);
+	animLen0->setVariation(box.lenght(), box.lenght()-ArrowBox::Renderer::arrowSeparation());
+	UpdateArrowBoxLenghtCommand* animLen1 = UpdateArrowBoxLenghtCommand::create(otherBox, false);
+	animLen1->setVariation(otherBox.lenght(), otherBox.lenght()+ArrowBox::Renderer::arrowSeparation());
+	cmd1->addCommand(anim1); cmd1->addCommand(animLen0); cmd1->addCommand(animLen1);
+	
+	SynchronousSubTaskCommand* cmd2 = SynchronousSubTaskCommand::create(0.5/3.0);
+	AnimateMoveArrowInArrowBoxCommand* anim2 = AnimateMoveArrowInArrowBoxCommand::create(otherBox, false);
+	cmd2->addCommand(anim2);
+	arrowRen->setBeginEnd(m_targetI, m_targetJ);
+	
+	subCommandQueue.push(cmd0);
+	subCommandQueue.push(cmd1);
+	subCommandQueue.push(cmd2);
+	subCommandQueue.push(RefreshArrowBoxCommand::create(box, true));
+	subCommandQueue.push(RefreshArrowBoxCommand::create(otherBox, true));
+	
+	if (isFirstArrowBox)
+		otherBox.moveArrowFromBegin(arrowRen, 0, box, anim2);
+	else
+		otherBox.moveArrowFromEnd(arrowRen, 0, box, anim2);
+}
+
+void MoveArrowToOtherArrowBoxResolveCrossingCommand::run(RendererGL& rendererGL) {		
+	OneHandleRenderer&  oneHandle = m_oneHandle.getRenderer();
+	ArrowBox::Renderer& box = m_arrowBox.getRenderer();
+	
+	const bool isFirstArrowBox = (&box == &(oneHandle.getFirstArrowBox()));
+	assert((&box == &(oneHandle.getSecondArrowBox())) || isFirstArrowBox);
+	
+	ArrowBox::Renderer& otherBox = (isFirstArrowBox) ? oneHandle.getSecondArrowBox() : oneHandle.getFirstArrowBox();
+	ArrowBox::ArrowRendererInList arrowRen = m_arrow.first.get().getArrowRendererInList();
+	PermutationBox::Renderer& permutation = oneHandle.getPermutation();
+	const unsigned int arrowBegin = arrowRen->begin();
+	const unsigned int arrowEnd   = arrowRen->end();
+	const int& arrowPos = m_arrow.second;
+	
+	const int n = (isFirstArrowBox) ? box.size() - arrowPos - 1 : arrowPos;
+	const unsigned int& leftI  = (isFirstArrowBox) ? arrowBegin : m_targetI;
+	const unsigned int& leftJ  = (isFirstArrowBox) ? arrowEnd   : m_targetJ;
+	const unsigned int& rightI = (isFirstArrowBox) ? m_targetI  : arrowBegin;
+	const unsigned int& rightJ = (isFirstArrowBox) ? m_targetJ  : arrowEnd;
+	const float permutationAnimStart = (isFirstArrowBox) ? 0.0 : 1.0;
+	
+	SynchronousSubTaskCommand* cmd0 = SynchronousSubTaskCommand::create((n + 0.5)/3.0);
+	AnimateMoveArrowInArrowBoxCommand* anim0 = AnimateMoveArrowInArrowBoxCommand::create(box, false);
+	cmd0->addCommand(anim0);
+	
+	ShowableCurve& trackI(permutation.getTrack(leftI).getCurve());
+	ShowableCurve& trackJ(permutation.getTrack(leftJ).getCurve());
+	const float t = static_cast<Bezier&>(trackI.getCurve()).getIntersectionXCoordMatch(static_cast<Bezier&>(trackJ.getCurve()));
+	SynchronousSubTaskCommand* cmd1 = SynchronousSubTaskCommand::create(t*permutation.lenght()/ArrowBox::Renderer::arrowSeparation());
+	AnimateMoveArrowPermutationBox* anim1 = AnimateMoveArrowPermutationBox::create(permutation, *arrowRen, leftI, leftJ, permutationAnimStart, t);
+	cmd1->addCommand(anim1);
+	
+	Bezier bezier00a(static_cast<Bezier&>(trackI.getCurve()));
+	Bezier bezier10a(static_cast<Bezier&>(trackJ.getCurve()));
+	Bezier bezier01a(bezier00a.splitCurve(t, true));
+	Bezier bezier11a(bezier10a.splitCurve(t, true));
+	
+	Bezier bezier00b(permutation.getBezier(leftI, rightI));
+	Bezier bezier10b(permutation.getBezier(leftJ, rightJ));
+	Bezier bezier01b(bezier00b.splitCurve(t, true));
+	Bezier bezier11b(bezier10b.splitCurve(t, true));
+	
+	TrackBezier* trackI0 = new TrackBezier(rendererGL, 1e+10, 1e+10, 1e+10, 1e+10, trackColor.r, trackColor.g, trackColor.b, permutation.getLayer(), EAST, WEST);
+	TrackBezier* trackJ0 = new TrackBezier(rendererGL, 1e+10, 1e+10, 1e+10, 1e+10, trackColor.r, trackColor.g, trackColor.b, permutation.getLayer(), EAST, WEST);
+	
+	SynchronousSubTaskCommand* cmd2 = SynchronousSubTaskCommand::create(2.0/3.0);
+	AnimateInterpolateShowableBezierCurve* animCurve = AnimateInterpolateShowableBezierCurve::create();
+	animCurve->addCurve(static_cast<ShowableBezier&>(trackI),  bezier00a, bezier00b);
+	animCurve->addCurve(static_cast<ShowableBezier&>(trackI0->getCurve()), bezier01a, bezier11b);
+	animCurve->addCurve(static_cast<ShowableBezier&>(trackJ),  bezier10a, bezier10b);
+	animCurve->addCurve(static_cast<ShowableBezier&>(trackJ0->getCurve()), bezier11a, bezier01b);
+	
+	std::pair<ArrowBox::ArrowRendererInList, int> p;
+	if (isFirstArrowBox) {
+		box.moveArrowToEnd(arrowRen, arrowPos, box, anim0);
+		p = box.pushBackArrow(rendererGL, m_newArrow, arrowEnd, arrowBegin, false);
+	} else {
+		box.moveArrowToBegin(arrowRen, arrowPos, box, anim0);
+		p = box.pushFrontArrow(rendererGL, m_newArrow, arrowEnd, arrowBegin, false);
+	}
+	ArrowBox::ArrowRendererInList& newArrowRen = p.first;
+	
+	AnimateMoveArrowPermutationBox* animPer0 = AnimateMoveArrowPermutationBox::create(permutation, *arrowRen, leftI, leftJ, 1.0, 1.0);
+	AnimateMoveArrowPermutationBox* animPer1 = AnimateMoveArrowPermutationBox::create(permutation, *newArrowRen, leftJ, leftI, 1.0, 1.0);
+	cmd2->addCommand(animCurve); cmd2->addCommand(animPer0); cmd2->addCommand(animPer1);
+	permutation.permute(std::make_pair(rightJ, rightI), nullptr, true);
+	
+	RemoveTrackCommand* cmd3 = RemoveTrackCommand::create();
+	cmd3->addCurve(*trackI0); cmd3->addCurve(*trackJ0);
+	
+	float f = std::max(t, 1.0f-t);
+	SynchronousSubTaskCommand* cmd4 = SynchronousSubTaskCommand::create(f*permutation.lenght()/ArrowBox::Renderer::arrowSeparation());
+	AnimateMoveArrowPermutationBox* anim2 = AnimateMoveArrowPermutationBox::create(permutation, *arrowRen, leftI, leftJ, t, 1.0-permutationAnimStart);
+	AnimateMoveArrowPermutationBox* anim3 = AnimateMoveArrowPermutationBox::create(permutation, *newArrowRen, leftJ, leftI, t, permutationAnimStart);
+	cmd4->addCommand(anim2); cmd4->addCommand(anim3);
+	
+	SynchronousSubTaskCommand* cmd5 = SynchronousSubTaskCommand::create(1.0/3.0);
+	AnimateMoveArrowInArrowBoxCommand* anim4 = AnimateMoveArrowInArrowBoxCommand::create(otherBox, false);
+	AnimateMoveArrowInArrowBoxCommand* anim5 = AnimateMoveArrowInArrowBoxCommand::create(box, false);
+	UpdateArrowBoxLenghtCommand* animLen1 = UpdateArrowBoxLenghtCommand::create(otherBox);
+	animLen1->setVariation(otherBox.lenght(), otherBox.lenght()+ArrowBox::Renderer::arrowSeparation());
+	cmd5->addCommand(animLen1); cmd5->addCommand(anim4); cmd5->addCommand(anim5);
+	arrowRen->setBeginEnd(m_targetI, m_targetJ);
+	
+	if (isFirstArrowBox) {
+		otherBox.moveArrowFromBeginWithOthers(arrowRen, 0, box, anim4);
+		box.moveArrowFromEnd(newArrowRen, 0, box, anim5);
+	} else {
+		otherBox.moveArrowFromEnd(arrowRen, 0, box, anim4);
+		box.moveArrowFromBeginWithOthers(newArrowRen, 0, box, anim5);
+	}
+	
+	subCommandQueue.push(cmd0);
+	subCommandQueue.push(cmd1);
+	subCommandQueue.push(cmd2);
+	subCommandQueue.push(cmd3);
+	subCommandQueue.push(RefreshPermutationBoxCommand::create(permutation));
+	subCommandQueue.push(cmd4);
+	subCommandQueue.push(cmd5);
+	subCommandQueue.push(RefreshArrowBoxCommand::create(box, true));
+	subCommandQueue.push(RefreshArrowBoxCommand::create(otherBox, true));
+}
+
+void PassArrowsThroughtZeroHandleCommand::run(RendererGL& rendererGL) {
+	AsynchronousSubTaskCommand* cmd = AsynchronousSubTaskCommand::create();
+	
+	ArrowBox::Renderer& arrowBox = m_arrowBox.getRenderer();
+	OneHandleRenderer& oneHandle = arrowBox.getOneHandle();
+	ZeroHandleRenderer& zeroHandle = oneHandle.getZeroHandle();
+	const bool isFirstArrowBox = (&arrowBox == &(oneHandle.getFirstArrowBox()));
+	assert((&arrowBox == &(oneHandle.getSecondArrowBox())) || isFirstArrowBox);
+	
+	size_t size = arrowBox.size();
+	size_t firstVoidArrowBoxNum = 0;
+	size_t secondVoidArrowBoxNum = 0;
+	size_t firstFullArrowBoxNum = 0;
+	size_t secondFullArrowBoxNum = 0;
+	for (size_t i=0; i<m_moveData.size(); ++i) {
+		int edge = zeroHandle.getEdgeFromArrowBox(m_moveData[i].m_targetArrowBox.getRenderer());
+		if (edge==0)
+			++firstFullArrowBoxNum;
+		else if (edge==1)
+			++secondVoidArrowBoxNum;
+		else if (edge==2)
+			++secondFullArrowBoxNum;
+		else
+			++firstVoidArrowBoxNum;
+	}
+	
+	if (&arrowBox!=&(zeroHandle.getVoidHandle().getFirstArrowBox()) && firstVoidArrowBoxNum>0) {
+		ArrowBox::Renderer& updateBox = zeroHandle.getVoidHandle().getFirstArrowBox();
+		UpdateArrowBoxLenghtCommand* lenAnim = UpdateArrowBoxLenghtCommand::create(updateBox, true);
+		AnimateMoveArrowInArrowBoxCommand* anim = AnimateMoveArrowInArrowBoxCommand::create(updateBox, false);
+		updateBox.moveArrowsFake(0, firstVoidArrowBoxNum, anim);
+		lenAnim->setVariation(updateBox.lenght(), updateBox.lenght()+firstVoidArrowBoxNum*ArrowBox::Renderer::arrowSeparation());
+		cmd->addCommand(lenAnim, 0.0, 1.0*firstVoidArrowBoxNum);
+		cmd->addCommand(anim, 1e-5, 1.0*firstVoidArrowBoxNum);
+	}
+	
+	if (&arrowBox!=&(zeroHandle.getVoidHandle().getSecondArrowBox()) && secondVoidArrowBoxNum>0) {
+		ArrowBox::Renderer& updateBox = zeroHandle.getVoidHandle().getSecondArrowBox();
+		UpdateArrowBoxLenghtCommand* lenAnim = UpdateArrowBoxLenghtCommand::create(updateBox, true);
+		lenAnim->setVariation(updateBox.lenght(), updateBox.lenght()+secondVoidArrowBoxNum*ArrowBox::Renderer::arrowSeparation());
+		cmd->addCommand(lenAnim, 0.0, 1.0*secondVoidArrowBoxNum);
+	}
+	
+	if (&arrowBox!=&(zeroHandle.getFullHandle().getFirstArrowBox()) && firstFullArrowBoxNum>0) {
+		ArrowBox::Renderer& updateBox = zeroHandle.getFullHandle().getFirstArrowBox();
+		UpdateArrowBoxLenghtCommand* lenAnim = UpdateArrowBoxLenghtCommand::create(updateBox, true);
+		AnimateMoveArrowInArrowBoxCommand* anim = AnimateMoveArrowInArrowBoxCommand::create(updateBox, false);
+		updateBox.moveArrowsFake(0, firstFullArrowBoxNum, anim);
+		lenAnim->setVariation(updateBox.lenght(), updateBox.lenght()+firstFullArrowBoxNum*ArrowBox::Renderer::arrowSeparation());
+		cmd->addCommand(lenAnim, 0.0, 1.0*firstFullArrowBoxNum);
+		cmd->addCommand(anim, 1e-5, 1.0*firstFullArrowBoxNum);
+	}
+	
+	if (&arrowBox!=&(zeroHandle.getFullHandle().getSecondArrowBox()) && secondFullArrowBoxNum>0) {
+		ArrowBox::Renderer& updateBox = zeroHandle.getFullHandle().getSecondArrowBox();
+		UpdateArrowBoxLenghtCommand* lenAnim = UpdateArrowBoxLenghtCommand::create(updateBox, true);
+		lenAnim->setVariation(updateBox.lenght(), updateBox.lenght()+secondFullArrowBoxNum*ArrowBox::Renderer::arrowSeparation());
+		cmd->addCommand(lenAnim, 0.0, 1.0*secondFullArrowBoxNum);
+	}
+	
+	UpdateArrowBoxLenghtCommand* lenAnim = UpdateArrowBoxLenghtCommand::create(arrowBox, true);
+	lenAnim->setVariation(arrowBox.lenght(), arrowBox.lenght()-ArrowBox::Renderer::arrowSeparation()*m_moveData.size());
+	cmd->addCommand(lenAnim, 0.0, 1.0*m_moveData.size());
+	
+	if (isFirstArrowBox) {
+		for (size_t i=0; i<m_moveData.size(); ++i) {
+			MoveData& moveData = m_moveData[i];
+			ArrowBox::ArrowRendererInList it = moveData.m_arrow.first.get().getArrowRendererInList();
+			
+			ArrowBox::Renderer& targetArrowBox = moveData.m_targetArrowBox.getRenderer();
+			OneHandleRenderer& targetOneHandle = targetArrowBox.getOneHandle();
+			const bool targetIsFirstArrowBox = (&targetArrowBox == &(targetOneHandle.getFirstArrowBox()));
+			assert((&targetArrowBox == &(targetOneHandle.getSecondArrowBox())) || targetIsFirstArrowBox);
+			
+			AnimateMoveArrowInArrowBoxCommand* anim0 = AnimateMoveArrowInArrowBoxCommand::create(arrowBox, false);
+			arrowBox.moveArrowToBeginFake(it, moveData.m_arrow.second, arrowBox, anim0);
+			AnimateMoveArrowPermutationBox* anim1 = AnimateMoveArrowPermutationBox::create(oneHandle.getPrePermutation(), *it,
+					moveData.m_beginI, moveData.m_beginJ, 1.0, 0.0);
+			
+			it->setBeginEnd(moveData.m_targetI, moveData.m_targetJ);
+			
+			int arrowBoxEdge = zeroHandle.getEdgeFromArrowBox(arrowBox);
+			int targetArrowBoxEdge = zeroHandle.getEdgeFromArrowBox(targetArrowBox);
+			unsigned int beginI = zeroHandle.getIndexFromTrack(moveData.m_beginI, arrowBoxEdge);
+			unsigned int beginJ = zeroHandle.getIndexFromTrack(moveData.m_beginJ, arrowBoxEdge);
+			unsigned int endI   = zeroHandle.getIndexFromTrack(moveData.m_endI,   targetArrowBoxEdge);
+			unsigned int endJ   = zeroHandle.getIndexFromTrack(moveData.m_endJ,   targetArrowBoxEdge);
+			int layer = (targetArrowBoxEdge==0 || targetArrowBoxEdge==2) ? 2 : 0;
+			Command<RendererGL&, float>* layerChangeCmd = ArrowSetLayerCommand::create(*it, layer);
+			Command<RendererGL&, float>* anim2 = MoveArrowThroughtZeroHandleCommand::create(*it, zeroHandle, beginI, endI, beginJ, endJ, 0.0, 1.0);
+			
+			
+			AnimateMoveArrowPermutationBox* anim3;
+			AnimateMoveArrowInArrowBoxCommand* anim4;
+			float targetPerLenght;
+			if (targetIsFirstArrowBox) {
+				targetPerLenght = targetOneHandle.getPrePermutation().lenght();
+				anim3 = AnimateMoveArrowPermutationBox::create(targetOneHandle.getPrePermutation(), *it, moveData.m_endI, moveData.m_endJ, 0.0, 1.0);
+				anim4 = AnimateMoveArrowInArrowBoxCommand::create(targetArrowBox, false);
+				
+				if (&targetOneHandle==&(zeroHandle.getVoidHandle())) {
+					targetArrowBox.moveArrowFromBeginFake(it, --firstVoidArrowBoxNum, arrowBox, anim4);
+				} else {
+					assert(&targetOneHandle==&(zeroHandle.getFullHandle()));
+					targetArrowBox.moveArrowFromBeginFake(it, --firstFullArrowBoxNum, arrowBox, anim4);
+				}
+			} else {
+				targetPerLenght = targetOneHandle.getPostPermutation().lenght();
+				anim3 = AnimateMoveArrowPermutationBox::create(targetOneHandle.getPostPermutation(), *it, moveData.m_targetI, moveData.m_targetJ, 1.0, 0.0);
+				anim4 = AnimateMoveArrowInArrowBoxCommand::create(targetArrowBox, false);
+				
+				if (&targetOneHandle==&(zeroHandle.getVoidHandle())) {
+					targetArrowBox.moveArrowFromEndFake(it, --secondVoidArrowBoxNum, arrowBox, anim4);
+				} else {
+					assert(&targetOneHandle==&(zeroHandle.getFullHandle()));
+					targetArrowBox.moveArrowFromEndFake(it, --secondFullArrowBoxNum, arrowBox, anim4);
+				}
+			}
+			
+			float t0 = moveData.m_arrow.second+0.5;
+			float t1 = t0 + oneHandle.getPrePermutation().lenght()/ArrowBox::Renderer::arrowSeparation();
+			float t2 = t1 + zeroHandle.getPathLenght(beginI, endI, beginJ, endJ)/ArrowBox::Renderer::arrowSeparation();
+			float t3 = t2 + targetPerLenght/ArrowBox::Renderer::arrowSeparation();
+			cmd->addCommand(anim0, 1e-5, t0); // Doit etre apres la modification de la taille des anses
+			cmd->addCommand(anim1, t0, t1);
+			cmd->addCommand(anim2, t1, t2);
+			cmd->addCommand(layerChangeCmd, (t1+t2)/2, (t1+t2)/2);
+			cmd->addCommand(anim3, t2, t3);
+			cmd->addCommand(anim4, t3, t3+0.5);
+		}
+	} else {
+		for (size_t i=0; i<m_moveData.size(); ++i) {
+			MoveData& moveData = m_moveData[i];
+			ArrowBox::ArrowRendererInList it = moveData.m_arrow.first.get().getArrowRendererInList();
+			ArrowBox::Renderer& targetArrowBox = moveData.m_targetArrowBox.getRenderer();
+			assert(&targetArrowBox!=&arrowBox);
+			
+			AnimateMoveArrowInArrowBoxCommand* anim0 = AnimateMoveArrowInArrowBoxCommand::create(arrowBox, false);
+			arrowBox.moveArrowToEndFake(it, moveData.m_arrow.second, arrowBox, anim0);
+			AnimateMoveArrowPermutationBox* anim1 = AnimateMoveArrowPermutationBox::create(oneHandle.getPostPermutation(), *it,
+					it->begin(), it->end(), 0.0, 1.0);
+			
+			it->setBeginEnd(moveData.m_targetI, moveData.m_targetJ);
+			
+			int arrowBoxEdge = zeroHandle.getEdgeFromArrowBox(arrowBox);
+			int targetArrowBoxEdge = zeroHandle.getEdgeFromArrowBox(targetArrowBox);
+			unsigned int beginI = zeroHandle.getIndexFromTrack(moveData.m_beginI, arrowBoxEdge);
+			unsigned int beginJ = zeroHandle.getIndexFromTrack(moveData.m_beginJ, arrowBoxEdge);
+			unsigned int endI   = zeroHandle.getIndexFromTrack(moveData.m_endI,   targetArrowBoxEdge);
+			unsigned int endJ   = zeroHandle.getIndexFromTrack(moveData.m_endJ,   targetArrowBoxEdge);
+			int layer = (targetArrowBoxEdge==0 || targetArrowBoxEdge==2) ? 2 : 0;
+			Command<RendererGL&, float>* layerChangeCmd = ArrowSetLayerCommand::create(*it, layer);
+			Command<RendererGL&, float>* anim2 = MoveArrowThroughtZeroHandleCommand::create(*it, zeroHandle, beginI, endI, beginJ, endJ, 0.0, 1.0);
+			
+			OneHandleRenderer& targetOneHandle = targetArrowBox.getOneHandle();
+			const bool targetIsFirstArrowBox = (&targetArrowBox == &(targetOneHandle.getFirstArrowBox()));
+			assert((&targetArrowBox == &(targetOneHandle.getSecondArrowBox())) || targetIsFirstArrowBox);
+			
+			float targetPerLenght;
+			AnimateMoveArrowPermutationBox* anim3;
+			AnimateMoveArrowInArrowBoxCommand* anim4;
+			if (targetIsFirstArrowBox) {
+				targetPerLenght = targetOneHandle.getPrePermutation().lenght();
+				anim3 = AnimateMoveArrowPermutationBox::create(targetOneHandle.getPrePermutation(), *it, moveData.m_endI, moveData.m_endJ, 0.0, 1.0);
+				anim4 = AnimateMoveArrowInArrowBoxCommand::create(targetArrowBox, false);
+				
+				if (&targetOneHandle==&(zeroHandle.getVoidHandle())) {
+					targetArrowBox.moveArrowFromBeginFake(it, --firstVoidArrowBoxNum, arrowBox, anim4);
+				} else {
+					assert(&targetOneHandle==&(zeroHandle.getFullHandle()));
+					targetArrowBox.moveArrowFromBeginFake(it, --firstFullArrowBoxNum, arrowBox, anim4);
+				}
+			} else {
+				targetPerLenght = targetOneHandle.getPostPermutation().lenght();
+				anim3 = AnimateMoveArrowPermutationBox::create(targetOneHandle.getPostPermutation(), *it, moveData.m_targetI, moveData.m_targetJ, 1.0, 0.0);
+				anim4 = AnimateMoveArrowInArrowBoxCommand::create(targetArrowBox, false);
+				
+				if (&targetOneHandle==&(zeroHandle.getVoidHandle())) {
+					targetArrowBox.moveArrowFromEndFake(it, --secondVoidArrowBoxNum, arrowBox, anim4);
+				} else {
+					assert(&targetOneHandle==&(zeroHandle.getFullHandle()));
+					targetArrowBox.moveArrowFromEndFake(it, --secondFullArrowBoxNum, arrowBox, anim4);
+				}
+			}
+			
+			float t0 = size-moveData.m_arrow.second-0.5;
+			float t1 = t0 + oneHandle.getPrePermutation().lenght()/ArrowBox::Renderer::arrowSeparation();
+			float t2 = t1 + zeroHandle.getPathLenght(beginI, endI, beginJ, endJ)/ArrowBox::Renderer::arrowSeparation();
+			float t3 = t2 + targetPerLenght/ArrowBox::Renderer::arrowSeparation();
+			cmd->addCommand(anim0, 1e-5, t0); // Doit etre apres la modification de la taille des anses
+			cmd->addCommand(anim1, t0, t1);
+			cmd->addCommand(anim2, t1, t2);
+			cmd->addCommand(layerChangeCmd, (t1+t2)/2, (t1+t2)/2);
+			cmd->addCommand(anim3, t2, t3);
+			cmd->addCommand(anim4, t3, t3+0.5);
+		}
+	}
+	
+	subCommandQueue.push(cmd);
+	subCommandQueue.push(RefreshArrowBoxCommand::create(zeroHandle.getFullHandle().getFirstArrowBox(),  true));
+	subCommandQueue.push(RefreshArrowBoxCommand::create(zeroHandle.getVoidHandle().getSecondArrowBox(), true));
+	subCommandQueue.push(RefreshArrowBoxCommand::create(zeroHandle.getFullHandle().getSecondArrowBox(), true));
+	subCommandQueue.push(RefreshArrowBoxCommand::create(zeroHandle.getFullHandle().getFirstArrowBox(),  true));
+}
 
 
 
@@ -1498,7 +1553,7 @@ void destroyDisplayCmd() {
 		subCommandQueue.pop();
 	}
 	
-	delete zeroHandle;
+	delete zeroHandleCurrent;
 }
 
 void processCommand(RendererGL& rendererGL, float dt) {
@@ -1589,20 +1644,20 @@ void postMoveArrowToFirstArrowBoxCommand(OneHandle& oneHandle) {
 	pthread_mutex_unlock(&displayMutex);
 }
 
-void postMoveArrowToOtherArrowBox(OneHandle& oneHandle, ArrowBox& arrowBox, ArrowInArrowBoxIndexed arrow, unsigned int targetI, unsigned int targetJ) {
+void postMoveArrowToOtherArrowBoxCommand(OneHandle& oneHandle, ArrowBox& arrowBox, ArrowInArrowBoxIndexed arrow, unsigned int targetI, unsigned int targetJ) {
 	pthread_mutex_lock(&displayMutex);
-		displayQueue.push(MoveArrowToOtherArrowBox::create(oneHandle, arrowBox, arrow, targetI, targetJ));
+		displayQueue.push(MoveArrowToOtherArrowBoxCommand::create(oneHandle, arrowBox, arrow, targetI, targetJ));
 	pthread_mutex_unlock(&displayMutex);
 }
 
-void postMoveArrowToOtherArrowBoxResolveCrossing(OneHandle& oneHandle, ArrowBox& arrowBox, ArrowInArrowBoxIndexed arrow, ArrowBox::ArrowInArrowBox& newArrow,
+void postMoveArrowToOtherArrowBoxResolveCrossingCommand(OneHandle& oneHandle, ArrowBox& arrowBox, ArrowInArrowBoxIndexed arrow, ArrowBox::ArrowInArrowBox& newArrow,
 		unsigned int targetI, unsigned int targetJ) {
 	pthread_mutex_lock(&displayMutex);
-		displayQueue.push(MoveArrowToOtherArrowBoxResolveCrossing::create(oneHandle, arrowBox, arrow, newArrow, targetI, targetJ));
+		displayQueue.push(MoveArrowToOtherArrowBoxResolveCrossingCommand::create(oneHandle, arrowBox, arrow, newArrow, targetI, targetJ));
 	pthread_mutex_unlock(&displayMutex);
 }
 
-void postPassArrowsThroughtZeroHandle(PassArrowsThroughtZeroHandle* cmd) {
+void postPassArrowsThroughtZeroHandleCommand(PassArrowsThroughtZeroHandleCommand* cmd) {
 	pthread_mutex_lock(&displayMutex);
 		displayQueue.push(cmd);
 	pthread_mutex_unlock(&displayMutex);

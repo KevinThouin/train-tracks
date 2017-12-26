@@ -25,83 +25,83 @@ public:
 
 class TrackBezier : public Track {
 private:
-	ShowableBezier curve;
+	ShowableBezier m_curve;
 	
 public:
 	TrackBezier(const TrackBezier& other) = delete;
-	TrackBezier(TrackBezier&& other) : curve(std::move(other.curve)) {}
+	TrackBezier(TrackBezier&& other) : m_curve(std::move(other.m_curve)) {}
 	TrackBezier() = default;
 	
 	TrackBezier(RendererGL& rendererGL, float p0x, float p0y, float p1x, float p1y, float r, float g, float b, int layer, Direction d0, Direction d1) :
-		curve(rendererGL, p0x, p0y, (d0&0x1) ? p0x : 0.5*(p1x+p0x), (d0&0x1) ? 0.5*(p1y+p0y) : p0y, 
+		m_curve(rendererGL, p0x, p0y, (d0&0x1) ? p0x : 0.5*(p1x+p0x), (d0&0x1) ? 0.5*(p1y+p0y) : p0y, 
 			  (d1&0x1) ? p1x : 0.5*(p0x+p1x), (d1&0x1) ? 0.5*(p0y+p1y) : p1y , p1x, p1y) {
-		curve.setColor(r, g, b);
-		curve.setLayer(layer);
-		curve.show(rendererGL);
+		m_curve.setColor(r, g, b);
+		m_curve.setLayer(layer);
+		m_curve.show(rendererGL);
 	}
 	
 	TrackBezier(RendererGL& rendererGL, float p0x, float p0y, float p1x, float p1y, float t0x, float t0y, float t1x, float t1y, float r, float g, float b, int layer) :
-		curve(rendererGL, p0x, p0y, p0x+t0x, p0y+t0y, p1x+t1x, p1y+t1y, p1x, p1y) {
-		curve.setColor(r, g, b);
-		curve.setLayer(layer);
-		curve.show(rendererGL);
+		m_curve(rendererGL, p0x, p0y, p0x+t0x, p0y+t0y, p1x+t1x, p1y+t1y, p1x, p1y) {
+		m_curve.setColor(r, g, b);
+		m_curve.setLayer(layer);
+		m_curve.show(rendererGL);
 	}
 	
-	TrackBezier(RendererGL& rendererGL, const Bezier& bezier, float r, float g, float b, int layer) : curve(rendererGL, bezier) {
-		curve.setColor(r, g, b);
-		curve.setLayer(layer);
-		curve.show(rendererGL);
+	TrackBezier(RendererGL& rendererGL, const Bezier& bezier, float r, float g, float b, int layer) : m_curve(rendererGL, bezier) {
+		m_curve.setColor(r, g, b);
+		m_curve.setLayer(layer);
+		m_curve.show(rendererGL);
 	}
 	
-	virtual ShowableCurve& getCurve() {return curve;}
-	virtual const ShowableCurve& getCurve() const {return curve;}
+	virtual ShowableCurve& getCurve() {return m_curve;}
+	virtual const ShowableCurve& getCurve() const {return m_curve;}
 	
 	void changePoints(float p0x, float p0y, float p1x, float p1y, Direction d0, Direction d1) {
-		curve.changePoints(p0x, p0y, (d0&0x1) ? p0x : 0.5*(p1x+p0x), (d0&0x1) ? 0.5*(p1y+p0y) : p0y,
+		m_curve.changePoints(p0x, p0y, (d0&0x1) ? p0x : 0.5*(p1x+p0x), (d0&0x1) ? 0.5*(p1y+p0y) : p0y,
 						   (d1&0x1) ? p1x : 0.5*(p0x+p1x), (d1&0x1) ? 0.5*(p0y+p1y) : p1y , p1x, p1y);
 	}
 	
 	static Bezier getBezier(float p0x, float p0y, float p1x, float p1y, Direction d0, Direction d1);
 	
 	void changePoints(float p0x, float p0y, float p1x, float p1y, float t0x, float t0y, float t1x, float t1y) {
-		curve.changePoints(p0x, p0y, p0x+t0x, p0y+t0y, p1x+t1x, p1y+t1y, p1x, p1y);
+		m_curve.changePoints(p0x, p0y, p0x+t0x, p0y+t0y, p1x+t1x, p1y+t1y, p1x, p1y);
 	}
 	
 	static Bezier getBezier(float p0x, float p0y, float p1x, float p1y, float t0x, float t0y, float t1x, float t1y);
 	
 	TrackBezier& operator=(TrackBezier&& other) {
-		curve = std::move(other.curve);
+		m_curve = std::move(other.m_curve);
 		return *this;
 	}
 };
 
 class TrackLine : public Track {
 private:
-	ShowableLine line;
+	ShowableLine m_line;
 	
 public:
 	TrackLine(const TrackLine& other) = delete;
-	TrackLine(TrackLine&& other) : line(std::move(other.line)) {}
+	TrackLine(TrackLine&& other) : m_line(std::move(other.m_line)) {}
 	TrackLine() = default;
 	
 	TrackLine(RendererGL& rendererGL, float p0x, float p0y, float p1x, float p1y, float r, float g, float b, int layer) :
-		line(rendererGL, p0x, p0y, p1x, p1y) {
-		line.setColor(r, g, b);
-		line.setLayer(layer);
-		line.show(rendererGL);
+		m_line(rendererGL, p0x, p0y, p1x, p1y) {
+		m_line.setColor(r, g, b);
+		m_line.setLayer(layer);
+		m_line.show(rendererGL);
 	}
 	
 	void changePoints(float p0x, float p0y, float p1x, float p1y) {
-		line.changePoints(p0x, p0y, p1x, p1y);
+		m_line.changePoints(p0x, p0y, p1x, p1y);
 	}
 	
 	TrackLine& operator=(TrackLine&& other) {
-		line = std::move(other.line);
+		m_line = std::move(other.m_line);
 		return *this;
 	}
 	
-	virtual ShowableCurve& getCurve() {return line;}
-	virtual const ShowableCurve& getCurve() const {return line;}
+	virtual ShowableCurve& getCurve() {return m_line;}
+	virtual const ShowableCurve& getCurve() const {return m_line;}
 };
 
 #endif // __TRACK_HPP__

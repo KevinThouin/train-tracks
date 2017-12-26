@@ -178,7 +178,7 @@ public:
 
 class Bezier : public Curve {
 private:
-	float controlPoints[4][2];
+	float m_controlPoints[4][2];
 	float m_lenght;
 	bool m_calculatedLenght = false;
 	
@@ -196,7 +196,7 @@ public:
 	void changePoints(float p0x, float p0y, float c0x, float c0y, float p1x, float p1y, float c1x, float c1y);
 	float getIntersectionXCoordMatch(const Bezier& other) const;
 	Bezier splitCurve(float t, bool keepBegin);
-	const float* getControlPoints() const {return &controlPoints[0][0];}
+	const float* getControlPoints() const {return &m_controlPoints[0][0];}
 };
 
 template <class CURVE>

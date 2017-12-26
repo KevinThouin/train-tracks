@@ -25,7 +25,7 @@ class GenCrossingCommand;
 class MoveCrossingCommand;
 class FadeCrossingCommand;
 class UpdateArrowBoxLenghtCommand;
-class PassArrowsThroughtZeroHandle;
+class PassArrowsThroughtZeroHandleCommand;
 class OneHandle;
 class OneHandleRenderer;
 
@@ -471,9 +471,9 @@ public:
 	int getArrowDepth(const ArrowBox& arrowBox, const ZeroHandle& zeroHandle, std::pair<unsigned int, unsigned int> tracks, bool to) const;
 	void removeDepthMArrows(const ZeroHandle& zeroHandle, int m, bool to);
 	unsigned int getMinimalDepth(const ZeroHandle& zeroHandle) const;
-	void addArrowFromZeroHandle(PassArrowsThroughtZeroHandle* cmd, ArrowBox& src, std::list<ArrowBox::ArrowInArrowBox*>::iterator arrow, int index,
+	void addArrowFromZeroHandle(PassArrowsThroughtZeroHandleCommand* cmd, ArrowBox& src, std::list<ArrowBox::ArrowInArrowBox*>::iterator arrow, int index,
 			unsigned int beginI, unsigned int beginJ, unsigned int endI, unsigned int endJ, bool fromLeft);
-	void removeArrowToZeroHandle(ZeroHandle& zeroHandle, PassArrowsThroughtZeroHandle* cmd, ArrowBox& src, std::list<ArrowBox::ArrowInArrowBox*>::iterator arrow, int index);
+	void removeArrowToZeroHandle(ZeroHandle& zeroHandle, PassArrowsThroughtZeroHandleCommand* cmd, ArrowBox& src, std::list<ArrowBox::ArrowInArrowBox*>::iterator arrow, int index);
 	void emptyArrowBoxThroughZeroHandle(ZeroHandle& zeroHandle, bool isFirstArrowBox);
 	
 	unsigned int numberOfTracks() const {return m_numberOfTracks;}

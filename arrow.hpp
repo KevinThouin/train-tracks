@@ -10,37 +10,37 @@
 class Arrow {
 public:
 	class Renderer {
-		Arrow& arw;
-		ShowableBezier arrowBody;
-		ShowableLine tip[2];
-		unsigned int i, j;
+		Arrow& m_arrow;
+		ShowableBezier m_arrowBody;
+		ShowableLine m_tip[2];
+		unsigned int m_begin, m_end;
 		
 	public:
 		Renderer(RendererGL& rendererGL, Arrow& arrow, float p0x, float p0y, float p1x, float p1y, float t0x, float t0y, float t1x, float t1y, int layer,
 				 unsigned int begin, unsigned int end);
 		void changePoints(float p0x, float p0y, float p1x, float p1y, float t0x, float t0y, float t1x, float t1y);
 		void setBeginEnd(unsigned int begin, unsigned int end) {
-			i = begin;
-			j = end;
+			m_begin = begin;
+			m_end = end;
 		}
 		void setLayer(int newLayer);
 		
-		unsigned int begin()    const {return i;}
-		unsigned int end()      const {return j;}
-		Arrow&       getArrow() const {return arw;}
+		unsigned int begin()    const {return m_begin;}
+		unsigned int end()      const {return m_end;}
+		Arrow&       getArrow() const {return m_arrow;}
 	};
 	
 private:
-	unsigned int i, j;
+	unsigned int m_begin, m_end;
 	
 public:
-	Arrow(unsigned int begin, unsigned int end) : i(begin), j(end) {assert(i!=j);}
+	Arrow(unsigned int begin, unsigned int end) : m_begin(begin), m_end(end) {assert(m_begin!=m_end);}
 	
-	unsigned int begin()  const {return i;}
-	unsigned int end()    const {return j;}
-	unsigned int lenght() const {return i>j ? i-j : j-i;}
-	bool         isUp()   const {return j<i;}
-	bool         isDown() const {return i<j;}
+	unsigned int begin()  const {return m_begin;}
+	unsigned int end()    const {return m_end;}
+	unsigned int lenght() const {return (m_begin>m_end) ? m_begin-m_end : m_end-m_begin;}
+	bool         isUp()   const {return m_end<m_begin;}
+	bool         isDown() const {return m_begin<m_end;}
 	
 	friend Renderer;
 };

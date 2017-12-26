@@ -160,7 +160,7 @@ unsigned int ZeroHandle::getDepth() const {
 	return std::min(m_voidHandle.getMinimalDepth(*this), m_fullHandle.getMinimalDepth(*this));
 }
 
-void ZeroHandle::moveArrowThroughout(PassArrowsThroughtZeroHandle* cmd, ArrowBox& src, std::list<ArrowBox::ArrowInArrowBox*>::iterator arrow, int index,
+void ZeroHandle::moveArrowThroughout(PassArrowsThroughtZeroHandleCommand* cmd, ArrowBox& src, std::list<ArrowBox::ArrowInArrowBox*>::iterator arrow, int index,
 			unsigned int beginI, unsigned int beginJ) {
 	unsigned int add;
 	

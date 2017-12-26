@@ -98,7 +98,7 @@ float Bezier::getPosComponent(float t, size_t component) const {
 	float c2 = 3*t*t*(1.0-t);
 	float c3 = t*t*t;
 	
-	return c0*controlPoints[0][component] + c1*controlPoints[1][component] + c2*controlPoints[2][component] + c3*controlPoints[3][component];
+	return c0*m_controlPoints[0][component] + c1*m_controlPoints[1][component] + c2*m_controlPoints[2][component] + c3*m_controlPoints[3][component];
 }
 
 float Bezier::getSpeedComponent(float t, size_t component) const {
@@ -107,7 +107,7 @@ float Bezier::getSpeedComponent(float t, size_t component) const {
 	float c2 = -3*t*(3*t-2.0);
 	float c3 = 3*t*t;
 	
-	return c0*controlPoints[0][component] + c1*controlPoints[1][component] + c2*controlPoints[2][component] + c3*controlPoints[3][component];
+	return c0*m_controlPoints[0][component] + c1*m_controlPoints[1][component] + c2*m_controlPoints[2][component] + c3*m_controlPoints[3][component];
 }
 
 float Bezier::getAccelerationComponent(float t, size_t component) const {
@@ -116,18 +116,18 @@ float Bezier::getAccelerationComponent(float t, size_t component) const {
 	float c2 = 18*t+6;
 	float c3 = 6.0;
 	
-	return c0*controlPoints[0][component] + c1*controlPoints[1][component] + c2*controlPoints[2][component] + c3*controlPoints[3][component];
+	return c0*m_controlPoints[0][component] + c1*m_controlPoints[1][component] + c2*m_controlPoints[2][component] + c3*m_controlPoints[3][component];
 }
 
 void Bezier::changePoints(float p0x, float p0y, float c0x, float c0y, float p1x, float p1y, float c1x, float c1y) {
-	controlPoints[0][0] = p0x;
-	controlPoints[0][1] = p0y;
-	controlPoints[1][0] = c0x;
-	controlPoints[1][1] = c0y;
-	controlPoints[2][0] = p1x;
-	controlPoints[2][1] = p1y;
-	controlPoints[3][0] = c1x;
-	controlPoints[3][1] = c1y;
+	m_controlPoints[0][0] = p0x;
+	m_controlPoints[0][1] = p0y;
+	m_controlPoints[1][0] = c0x;
+	m_controlPoints[1][1] = c0y;
+	m_controlPoints[2][0] = p1x;
+	m_controlPoints[2][1] = p1y;
+	m_controlPoints[3][0] = c1x;
+	m_controlPoints[3][1] = c1y;
 }
 
 /* Utilise l'algorithme de bissection-Newton pour approximer l'intersection

@@ -8,7 +8,7 @@
 extern "C" {
 #endif
 
-#define VERSION "1.0.0"
+#define VERSION "1.0.1"
 
 #ifdef __GNUC__
  #define USE_GCC 1

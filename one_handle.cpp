@@ -964,7 +964,7 @@ void ArrowBox::fillArrowsRendererLists(std::list<std::pair<unsigned int, unsigne
 
 void ArrowBox::moveArrowsThroughoutZeroHandle(ZeroHandle& zeroHandle, OneHandle& oneHandle, bool fromEnd) {
 	if (!m_arrows.empty()) {
-		PassArrowsThroughtZeroHandle* cmd = PassArrowsThroughtZeroHandle::create(*this);
+		PassArrowsThroughtZeroHandleCommand* cmd = PassArrowsThroughtZeroHandleCommand::create(*this);
 		
 		if (!fromEnd) {
 			int i=0;
@@ -977,7 +977,7 @@ void ArrowBox::moveArrowsThroughoutZeroHandle(ZeroHandle& zeroHandle, OneHandle&
 			}
 		}
 		
-		postPassArrowsThroughtZeroHandle(cmd);
+		postPassArrowsThroughtZeroHandleCommand(cmd);
 	}
 }
 
@@ -1304,7 +1304,7 @@ void OneHandle::transferArrowToSecondArrowBox(ArrowBox::ArrowInArrowBoxIndexedIt
 	arrow = Arrow(targetI, targetJ);
 	assert(arrow.isDown());
 	
-	postMoveArrowToOtherArrowBox(*this, m_arrows0, makeArrowInArrowBoxIndexed(it), targetI, targetJ);
+	postMoveArrowToOtherArrowBoxCommand(*this, m_arrows0, makeArrowInArrowBoxIndexed(it), targetI, targetJ);
 }
 
 void OneHandle::transferArrowToSecondArrowBoxResolveCrossing(ArrowBox::ArrowInArrowBoxIndexedIterator it, ArrowBox::ArrowInArrowBoxIndexedIterator& end) {
@@ -1319,7 +1319,7 @@ void OneHandle::transferArrowToSecondArrowBoxResolveCrossing(ArrowBox::ArrowInAr
 	arrow = Arrow(targetJ, targetI);
 	assert(arrow.isDown());
 	
-	postMoveArrowToOtherArrowBoxResolveCrossing(*this, m_arrows0, makeArrowInArrowBoxIndexed(it), m_arrows0.back(), targetJ, targetI);
+	postMoveArrowToOtherArrowBoxResolveCrossingCommand(*this, m_arrows0, makeArrowInArrowBoxIndexed(it), m_arrows0.back(), targetJ, targetI);
 }
 
 void OneHandle::doLemma30(ArrowBox::ArrowInArrowBoxIndexedIterator begin, ArrowBox::ArrowInArrowBoxIndexedIterator& end) {
@@ -1460,7 +1460,7 @@ unsigned int OneHandle::getMinimalDepth(const ZeroHandle& zeroHandle) const {
 	return std::min(m_arrows0.getMinimalDepth(*this, zeroHandle), m_arrows1.getMinimalDepth(*this, zeroHandle));
 }
 
-void OneHandle::addArrowFromZeroHandle(PassArrowsThroughtZeroHandle* cmd, ArrowBox& src, std::list<ArrowBox::ArrowInArrowBox*>::iterator arrow, int index,
+void OneHandle::addArrowFromZeroHandle(PassArrowsThroughtZeroHandleCommand* cmd, ArrowBox& src, std::list<ArrowBox::ArrowInArrowBox*>::iterator arrow, int index,
 			unsigned int beginI, unsigned int beginJ, unsigned int endI, unsigned int endJ, bool fromLeft) {
 	if (fromLeft) {
 		unsigned int targetI = m_prePermutation.post(endI);
@@ -1479,7 +1479,7 @@ void OneHandle::addArrowFromZeroHandle(PassArrowsThroughtZeroHandle* cmd, ArrowB
 	}
 }
 
-void OneHandle::removeArrowToZeroHandle(ZeroHandle& zeroHandle, PassArrowsThroughtZeroHandle* cmd, ArrowBox& src,
+void OneHandle::removeArrowToZeroHandle(ZeroHandle& zeroHandle, PassArrowsThroughtZeroHandleCommand* cmd, ArrowBox& src,
 		std::list<ArrowBox::ArrowInArrowBox*>::iterator arrow, int index) {
 	bool isFirstArrowBox = (&src==&m_arrows0);
 	assert((&src==&m_arrows1) != isFirstArrowBox);
