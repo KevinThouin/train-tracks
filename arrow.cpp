@@ -1,7 +1,7 @@
 #include <cmath>
 
 #include "arrow.hpp"
-#include "color.h"
+#include "color.hpp"
 
 Arrow::Renderer::Renderer(RendererGL& rendererGL, Arrow& arrow, float p0x, float p0y, float p1x, float p1y, float t0x, float t0y, float t1x, float t1y, int layer,
 				 unsigned int begin, unsigned int end) : m_arrow(arrow), m_begin(begin), m_end(end)

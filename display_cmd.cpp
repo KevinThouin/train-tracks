@@ -1556,7 +1556,7 @@ void destroyDisplayCmd() {
 	delete zeroHandleCurrent;
 }
 
-void processCommand(RendererGL& rendererGL, float dt) {
+void processDisplayCommand(RendererGL& rendererGL, float dt) {
 	Command<RendererGL&, float, float&>* subTask;
 	float pastTime;
 	while (!subCommandQueue.empty()) {

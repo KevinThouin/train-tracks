@@ -1,12 +1,8 @@
 #ifndef __UTIL_H__
 #define __UTIL_H__
 
-#include <stdlib.h>
-#include <limits.h>
-
-#ifdef __cplusplus__
-extern "C" {
-#endif
+#include <cstdlib>
+#include <climits>
 
 #define VERSION "1.0.1"
 
@@ -26,12 +22,29 @@ extern "C" {
  #define UNREACHABLE() ((void) 0)
 #endif
 
+namespace {
+	
 #if USE_GCC && GCC_VERSION>40600
-static inline int msb(size_t v) {
-	return sizeof(v)*CHAR_BIT - __builtin_clz(v) - 1;
+inline int clz(unsigned int v) {
+	return __builtin_clz(v);
 }
+
+inline int clz(unsigned long v) {
+	return __builtin_clzl(v);
+}
+
+inline int clz(unsigned long long v) {
+	return __builtin_clzll(v);
+}
+
+template <typename INT_TYPE>
+int msb(INT_TYPE v) {
+	return sizeof(INT_TYPE)*CHAR_BIT - clz(v) - 1;
+}
+
 #else
-static inline int msb(size_t v) {
+template <typename INT_TYPE>
+inline int msb(INT_TYPE v) {
 	int ret = 0;
 	while (v>>=1) {
 		++ret;
@@ -40,8 +53,6 @@ static inline int msb(size_t v) {
 }
 #endif
 
-#ifdef __cplusplus__
 }
-#endif
 
 #endif /* __UTIL_H__ */

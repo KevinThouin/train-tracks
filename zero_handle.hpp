@@ -12,7 +12,6 @@ class ZeroHandleRenderer;
 #include "track.hpp"
 #include "curves.hpp"
 #include "surface.hpp"
-#include "c_cpp_bridge.h"
 #include "draw_gl.hpp"
 #include "one_handle.hpp"
 #include "display_cmd.hpp"

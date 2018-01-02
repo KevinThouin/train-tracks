@@ -7,7 +7,7 @@
 #include <numeric>
 
 #include "matrix.hpp"
-#include "util.h"
+#include "util.hpp"
 
 FUMatrix FUMatrix::operator*(const FUMatrix& other) const {
 	assert(m_size == other.m_size);

@@ -503,7 +503,7 @@ public:
 
 void initDisplayCmd();
 void destroyDisplayCmd();
-void processCommand(RendererGL& rendererGL, float dt);
+void processDisplayCommand(RendererGL& rendererGL, float dt);
 void postDrawZeroHandle(Pairing handlePairing, ZeroHandle& zeroHandle,
 		std::list<std::pair<unsigned int, unsigned int>>&& voidArrowsData, std::list<ArrowBox::ArrowInArrowBox*>&& voidArrows,
 		std::list<std::pair<unsigned int, unsigned int>>&& fullArrowsData, std::list<ArrowBox::ArrowInArrowBox*>&& fullArrows);

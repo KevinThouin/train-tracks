@@ -12,7 +12,7 @@
 #include "curves.hpp"
 #include "surface.hpp"
 #include "track.hpp"
-#include "color.h"
+#include "color.hpp"
 
 class ZeroHandle;
 class ZeroHandleRenderer;

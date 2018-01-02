@@ -1,36 +1,122 @@
-#include <glib.h>
-#include <gio/gio.h>
+#include <cassert>
+#include <cstring>
+
+#include <glibmm/bytes.h>
+#include <giomm/resource.h>
 
 #include "prog_gl.hpp"
-#include "train_tracks_app_window.h"
+#include "train_tracks_app_window.hpp"
+
+#define MAX_GLSL_NAME_LENGHT 256
+
+ProgGlBaseException::ProgGlBaseException(const ProgGlBaseException& other) : std::runtime_error(other), m_msg(new char[other.m_msg_lenght+1]),
+		m_msg_lenght(other.m_msg_lenght) {
+	strcpy(m_msg, other.m_msg);
+}
+
+
+ProgGlBaseException::ProgGlBaseException(ProgGlBaseException&& other) : std::runtime_error(std::move(other)), m_msg(other.m_msg), m_msg_lenght(other.m_msg_lenght) {
+	other.m_msg = nullptr;
+	other.m_msg_lenght = 0;
+}
+
+ProgGlBaseException& ProgGlBaseException::operator=(const ProgGlBaseException& other) {
+	std::runtime_error::operator=(other);
+	
+	delete [] m_msg;
+	m_msg_lenght = other.m_msg_lenght;
+	m_msg = new char[m_msg_lenght+1];
+	strcpy(m_msg, other.m_msg);
+	return *this;
+}
+
+ProgGlBaseException& ProgGlBaseException::operator=(ProgGlBaseException&& other) {
+	std::runtime_error::operator=(std::move(other));
+	
+	delete [] m_msg;
+	m_msg_lenght = other.m_msg_lenght;
+	m_msg = other.m_msg;
+	other.m_msg = nullptr;
+	other.m_msg_lenght = 0;
+	return *this;
+}
+
+ProgGlCompileException ProgGlCompileException::create(int shaderType) {
+	const char* msg;
+	switch (shaderType) {
+		case GL_VERTEX_SHADER:
+			msg = "Erreur de compilation du vertex shader: ";
+			break;
+		
+		case GL_FRAGMENT_SHADER:
+			msg = "Erreur de compilation du fragment shader: ";
+			break;
+		
+		case GL_GEOMETRY_SHADER:
+			msg = "Erreur de compilation du geometry shader: ";
+			break;
+		
+		default:
+			msg = "Erreur de compilation du shader de type inconnu: ";
+			break;
+	};
+	return ProgGlCompileException(msg);
+}
+
+void ProgGlCompileException::setMessage(GLuint shaderId) {
+	int logLen;
+	glGetShaderiv(shaderId, GL_INFO_LOG_LENGTH, &logLen);
+	allocateMsg(logLen);
+	glGetShaderInfoLog(shaderId, logLen, NULL, getMsg());
+}
+
+void ProgGlLinkException::setMessage(GLuint programId) {
+	int logLen = 0;
+	glGetProgramiv(programId, GL_INFO_LOG_LENGTH, &logLen);
+	allocateMsg(logLen);
+	glGetProgramInfoLog(programId, logLen, NULL, getMsg());
+}
+
+ProgGlUndefinedVariableException ProgGlUndefinedVariableException::create(VariableType type) {
+	const char* msg;
+	switch (type) {
+		case ATTRIBUTE:
+			msg = "Attribut non-definie: ";
+			break;
+		
+		case UNIFORM:
+			msg = "Variable uniforme non-definie: ";
+			break;
+	}
+	return ProgGlUndefinedVariableException(msg);
+}
+
+void ProgGlUndefinedVariableException::setMessage(const char* msg) {
+	allocateMsg(strnlen(msg, MAX_GLSL_NAME_LENGHT));
+	strncpy(getMsg(), msg, MAX_GLSL_NAME_LENGHT);
+	getMsg()[lenght()] = '\0';
+}
+
+
+
+
 
 ProgramsGL::Shader::Shader(std::string src_location, int type) {
-	GBytes* src = g_resources_lookup_data(src_location.c_str(), G_RESOURCE_LOOKUP_FLAGS_NONE, NULL);
-	const char* str_src = static_cast<const char*>(g_bytes_get_data (src, NULL));
+	gsize size;
+	Glib::RefPtr<const Glib::Bytes> src(Gio::Resource::lookup_data_global(src_location, Gio::RESOURCE_LOOKUP_FLAGS_NONE));
+	const char* str_src = static_cast<const char*>(src->get_data(size));
 	
 	m_shader_id = glCreateShader(type);
 	glShaderSource (m_shader_id, 1, &str_src, NULL);
 	glCompileShader (m_shader_id);
-	g_bytes_unref(src);
 	
 	int status;
 	glGetShaderiv(m_shader_id, GL_COMPILE_STATUS, &status);
 	if (status==GL_FALSE) {
-		int log_len;
-		glGetShaderiv(m_shader_id, GL_INFO_LOG_LENGTH, &log_len);
-
-		char *buffer = new char[log_len + 1];
-		glGetShaderInfoLog(m_shader_id, log_len, NULL, buffer);
-
-		std::string msg;
-		msg += "Erreur de compilation du ";
-		msg += (type == GL_VERTEX_SHADER ? "vertex " : "fragment ");
-		msg += "shader: ";
-		msg += buffer;
-
-		delete [] buffer;
+		ProgGlCompileException err(ProgGlCompileException::create(GL_VERTEX_SHADER));
+		err.setMessage(m_shader_id);
 		glDeleteShader (m_shader_id);
-		throw msg;
+		throw err;
 	}
 }
 
@@ -48,40 +134,36 @@ void ProgramsGL::Program::link() {
 	glGetProgramiv (m_program_id, GL_LINK_STATUS, &status);
 	if (status == GL_FALSE)
 	{
-		int log_len = 0;
-		glGetProgramiv(m_program_id, GL_INFO_LOG_LENGTH, &log_len);
-
-		char *buffer = new char[log_len + 1];
-		glGetProgramInfoLog(m_program_id, log_len, NULL, buffer);
-		
-		std::string msg;
-		msg += "Erreur d'edition de lien: ";
-		msg += buffer;
-
-		delete [] buffer;
-
+		ProgGlLinkException err(ProgGlLinkException::create());
+		err.setMessage(m_program_id);
 		glDeleteProgram(m_program_id);
-		throw msg;
+		throw err;
     }
 }
 
 void ProgramsGL::Program::loadUniforms(const char** names, size_t num) {
 	for (size_t i=0; i<num; i++) {
 		GLint uniform = glGetUniformLocation(m_program_id, names[i]);
-		if (uniform != -1)
+		if (uniform != -1) {
 			m_uniforms.push_back(uniform);
-		else
-			throw std::string("Variable uniforme \"") + names[i] + "\" non-definie";
+		} else {
+			ProgGlUndefinedVariableException err(ProgGlUndefinedVariableException::create(ProgGlUndefinedVariableException::UNIFORM));
+			err.setMessage(names[i]);
+			throw err;
+		}
 	}
 }
 
 void ProgramsGL::Program::loadAttributes(const char** names, size_t num) {
 	for (size_t i=0; i<num; i++) {
 		GLint attribute = glGetAttribLocation(m_program_id, names[i]);
-		if (attribute != -1)
+		if (attribute != -1) {
 			m_attributes.push_back(attribute);
-		else
-			throw std::string("Attribut \"") + names[i] + "\" non-definie";
+		} else {
+			ProgGlUndefinedVariableException err(ProgGlUndefinedVariableException::create(ProgGlUndefinedVariableException::ATTRIBUTE));
+			err.setMessage(names[i]);
+			throw err;
+		}
 	}
 }
 

@@ -8,9 +8,8 @@
     <property name="value">55</property>
     <property name="step_increment">1</property>
     <property name="page_increment">10</property>
-    <signal name="value-changed" handler="speed_changed" object="TrainTracksAppWindow" swapped="yes"/>
   </object>
-  <template class="TrainTracksAppWindow" parent="GtkApplicationWindow">
+  <object class="GtkApplicationWindow" id="train_tracks_app_window">
     <property name="can_focus">False</property>
     <property name="border_width">6</property>
     <property name="default_width">400</property>
@@ -29,10 +28,6 @@
         <property name="spacing">6</property>
         <child>
           <object class="GtkGLArea" id="gl_drawing_area">
-			<signal name="realize" handler="gl_init" object="TrainTracksAppWindow" swapped="yes"/>
-            <signal name="unrealize" handler="gl_fini" object="TrainTracksAppWindow" swapped="yes"/>
-            <signal name="render" handler="gl_draw" object="TrainTracksAppWindow" swapped="yes"/>
-			<signal name="resize" handler="gl_resize" object="TrainTracksAppWindow" swapped="yes"/>
             <property name="visible">True</property>
             <property name="can_focus">True</property>
 			<property name="hexpand">True</property>
@@ -129,7 +124,7 @@
     <child>
       <placeholder/>
     </child>
-  </template>
+  </object>
   <object class="GtkSizeGroup" id="control_label_scale">
     <widgets>
       <widget name="speed_label"/>

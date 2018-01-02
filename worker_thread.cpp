@@ -8,7 +8,7 @@
 
 #include <pthread.h>
 
-#include "worker_thread.h"
+#include "worker_thread.hpp"
 #include "command.hpp"
 #include "matrix.hpp"
 #include "zero_handle.hpp"

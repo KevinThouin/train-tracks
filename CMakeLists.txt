@@ -14,10 +14,10 @@ find_package(Threads REQUIRED)
 find_package(PkgConfig REQUIRED)
 find_package(OpenGL REQUIRED)
 find_package(GLEW REQUIRED)
-pkg_check_modules(GTK3 REQUIRED gtk+-3.0)
+pkg_check_modules(GTKMM3 gtkmm-3.0)
 
-include_directories(${GTK3_INCLUDE_DIRS} ${OPENGL_INCLUDE_DIRS} ${GLEW_INCLUDE_DIRS})
-link_directories(${GTK3_LIBRARY_DIRS})
+include_directories(${GTKMM3_INCLUDE_DIRS} ${OPENGL_INCLUDE_DIRS} ${GLEW_INCLUDE_DIRS})
+link_directories(${GTKMM3_LIBRARY_DIRS})
 
 add_custom_command(
 	OUTPUT ${CMAKE_BINARY_DIR}/gresource.c
@@ -28,10 +28,10 @@ add_custom_command(
 			${CMAKE_SOURCE_DIR}/train_tracks_vertex.glsl
 			${CMAKE_SOURCE_DIR}/train_tracks_fragment.glsl)
 
-add_definitions(${GTK3_CFLAGS_OTHER})
+add_definitions(${GTKMM3_CFLAGS_OTHER})
 
-add_executable(train_tracks main.c train_tracks_app.c train_tracks_app_window.c gresource.c color.c train_tracks_error.c prog_gl.cpp draw_gl.cpp
-	c_cpp_bridge.cpp curves.cpp worker_thread.cpp permutation.cpp zero_handle.cpp matrix.cpp display_cmd.cpp track.cpp one_handle.cpp arrow.cpp io.cpp)
+add_executable(train_tracks main.cpp train_tracks_app.cpp train_tracks_app_window.cpp gresource.c color.cpp train_tracks_error.cpp prog_gl.cpp draw_gl.cpp
+	curves.cpp worker_thread.cpp permutation.cpp zero_handle.cpp matrix.cpp display_cmd.cpp track.cpp one_handle.cpp arrow.cpp io.cpp)
 
 CHECK_FUNCTION_EXISTS(fmod RESULT)
 if(NOT RESULT)
@@ -44,4 +44,4 @@ if(NOT RESULT)
     message(FATAL_ERROR "No fmod() found")
   endif()
 endif()
-target_link_libraries(train_tracks ${GTK3_LIBRARIES} ${OPENGL_gl_LIBRARY} ${GLEW_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
+target_link_libraries(train_tracks ${GTKMM3_LIBRARIES} ${OPENGL_gl_LIBRARY} ${GLEW_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})

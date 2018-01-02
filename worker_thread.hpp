@@ -1,14 +1,10 @@
-#ifndef __WORKER_THREAD_H__
-#define __WORKER_THREAD_H__
+#ifndef __WORKER_THREAD_HPP__
+#define __WORKER_THREAD_HPP__
 
 #include <pthread.h>
 
 #ifdef __cplusplus
 #include "matrix.hpp"
-#endif
-
-#ifdef __cplusplus
-extern "C" {
 #endif
 
 int shouldWorkerStop();
@@ -21,8 +17,4 @@ void postOnPlay();
 void postSetStructure(unsigned int k, FUMatrix&& matrix);
 #endif
 
-#ifdef __cplusplus
-}
-#endif
-
-#endif /* __WORKER_THREAD_H__ */
+#endif /* __WORKER_THREAD_HPP__ */

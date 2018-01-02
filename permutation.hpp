@@ -6,7 +6,6 @@
 #include <utility>
 #include <algorithm>
 
-#include "c_cpp_bridge.h"
 #include "matrix.hpp"
 
 class BiPermutation;

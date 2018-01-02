@@ -1,5 +1,5 @@
 #include "zero_handle.hpp"
-#include "color.h"
+#include "color.hpp"
 
 #include <cassert>
 #include <algorithm>

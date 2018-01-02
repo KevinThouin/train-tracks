@@ -5,10 +5,60 @@
 #include <cstdarg>
 #include <cstdlib>
 #include <vector>
-#include <iostream>
+#include <stdexcept>
 
 #include <GL/glew.h>
 #include <GL/gl.h>
+
+class ProgGlBaseException : public std::runtime_error {
+	char* m_msg = nullptr;
+	size_t m_msg_lenght = 0;
+	
+public:
+	ProgGlBaseException(const char* what) : std::runtime_error(what) {};
+	ProgGlBaseException(const ProgGlBaseException& other);
+	ProgGlBaseException(ProgGlBaseException&& other);
+	
+	virtual ~ProgGlBaseException() {delete [] m_msg;}
+	
+	ProgGlBaseException& operator=(const ProgGlBaseException& other);
+	ProgGlBaseException& operator=(ProgGlBaseException&& other);
+	const char* getMessage() const {return m_msg;}
+	
+protected:
+	char*& getMsg() {return m_msg;}
+	void allocateMsg(size_t strlen) {m_msg_lenght = strlen ;m_msg = new char[strlen+1];}
+	size_t lenght() const {return m_msg_lenght;}
+};
+
+class ProgGlCompileException : public ProgGlBaseException {
+	ProgGlCompileException(const char* what) : ProgGlBaseException(what) {}
+	
+public:
+	static ProgGlCompileException create(int shaderType);
+	void setMessage(GLuint shaderId);
+};
+
+class ProgGlLinkException : public ProgGlBaseException {
+	ProgGlLinkException(const char* what) : ProgGlBaseException(what) {}
+	
+public:
+	static ProgGlLinkException create() {return ProgGlLinkException("Erreur d'edition de lien: ");}
+	void setMessage(GLuint programId);
+};
+
+class ProgGlUndefinedVariableException : public ProgGlBaseException {
+	ProgGlUndefinedVariableException(const char* what) : ProgGlBaseException(what) {}
+	
+public:
+	enum VariableType {
+		ATTRIBUTE,
+		UNIFORM
+	};
+	
+	static ProgGlUndefinedVariableException create(VariableType type);
+	void setMessage(const char* msg);
+};
 
 class ProgramsGL {
   private:
